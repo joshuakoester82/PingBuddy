@@ -5,6 +5,8 @@ using System.Windows.Forms;
 using System.Net.NetworkInformation;
 using System.Drawing;
 using System.Linq;
+using System.IO;
+using System.Text.Json;
 
 namespace PingBuddy
 {
@@ -325,12 +327,69 @@ namespace PingBuddy
 
         private void ExportSettingsButton_Click(object sender, EventArgs e)
         {
-            // TODO: Implement export settings functionality
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                saveFileDialog.FilterIndex = 1;
+                saveFileDialog.RestoreDirectory = true;
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        Settings settings = new Settings
+                        {
+                            PingJobs = pingJobs
+                        };
+
+                        string jsonString = JsonSerializer.Serialize(settings, new JsonSerializerOptions
+                        {
+                            WriteIndented = true
+                        });
+
+                        File.WriteAllText(saveFileDialog.FileName, jsonString);
+                        MessageBox.Show("Settings exported successfully!", "Export Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error exporting settings: {ex.Message}", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
 
         private void ImportSettingsButton_Click(object sender, EventArgs e)
         {
-            // TODO: Implement import settings functionality
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string jsonString = File.ReadAllText(openFileDialog.FileName);
+                        Settings settings = JsonSerializer.Deserialize<Settings>(jsonString);
+
+                        if (settings != null && settings.PingJobs != null)
+                        {
+                            pingJobs = settings.PingJobs;
+                            UpdateJobList();
+                            MessageBox.Show("Settings imported successfully!", "Import Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("The imported file doesn't contain valid settings.", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error importing settings: {ex.Message}", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
