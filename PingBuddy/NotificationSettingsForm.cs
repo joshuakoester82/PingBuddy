@@ -27,6 +27,7 @@ namespace PingBuddy
             toAddressTextBox.Text = Settings.EmailToAddress;
             useSoundAlertCheckBox.Checked = Settings.UseSoundAlert;
             soundFilePathTextBox.Text = Settings.SoundAlertFilePath;
+            textBoxEmailMinuteLimit.Text = Settings.EmailMinuteLimit.ToString();
         }
 
         private void SaveButton_Click(object sender, EventArgs e)
@@ -40,20 +41,21 @@ namespace PingBuddy
             Settings.EmailToAddress = toAddressTextBox.Text;
             Settings.UseSoundAlert = useSoundAlertCheckBox.Checked;
             Settings.SoundAlertFilePath = soundFilePathTextBox.Text;
+            Settings.EmailMinuteLimit = int.TryParse(textBoxEmailMinuteLimit.Text, out int minutelimit) ? minutelimit : 0;
 
             this.DialogResult = DialogResult.OK;
         }
 
         private void EmailTestButton_Click(object sender, EventArgs e)
         {
-            
+
             string emailSmtpServer = smtpServerTextBox.Text;
-             int emailSmtpPort = int.TryParse(smtpPortTextBox.Text, out int port) ? port : 587;
-             string emailUsername = usernameTextBox.Text;
-             string emailPassword = passwordTextBox.Text;
-             string emailFromAddress = fromAddressTextBox.Text;
-             string emailtoAddress = toAddressTextBox.Text;
-            
+            int emailSmtpPort = int.TryParse(smtpPortTextBox.Text, out int port) ? port : 587;
+            string emailUsername = usernameTextBox.Text;
+            string emailPassword = passwordTextBox.Text;
+            string emailFromAddress = fromAddressTextBox.Text;
+            string emailtoAddress = toAddressTextBox.Text;
+
 
             // Check if all necessary email parameters are set
             if (string.IsNullOrWhiteSpace(emailSmtpServer) ||
@@ -108,6 +110,11 @@ namespace PingBuddy
                     soundFilePathTextBox.Text = openFileDialog.FileName;
                 }
             }
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

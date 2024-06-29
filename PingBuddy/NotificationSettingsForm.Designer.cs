@@ -48,6 +48,9 @@
             toAddressLabel = new Label();
             soundFileLabel = new Label();
             emailtestButton = new Button();
+            textBoxEmailMinuteLimit = new TextBox();
+            label1 = new Label();
+            label2 = new Label();
             SuspendLayout();
             // 
             // smtpServerTextBox
@@ -242,11 +245,43 @@
             emailtestButton.UseVisualStyleBackColor = true;
             emailtestButton.Click += EmailTestButton_Click;
             // 
+            // textBoxEmailMinuteLimit
+            // 
+            textBoxEmailMinuteLimit.Location = new Point(434, 460);
+            textBoxEmailMinuteLimit.Margin = new Padding(5, 6, 5, 6);
+            textBoxEmailMinuteLimit.Name = "textBoxEmailMinuteLimit";
+            textBoxEmailMinuteLimit.Size = new Size(69, 31);
+            textBoxEmailMinuteLimit.TabIndex = 20;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(217, 463);
+            label1.Margin = new Padding(5, 0, 5, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(217, 25);
+            label1.TabIndex = 21;
+            label1.Text = "Limit emails to once every";
+            label1.Click += label1_Click;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(513, 463);
+            label2.Margin = new Padding(5, 0, 5, 0);
+            label2.Name = "label2";
+            label2.Size = new Size(75, 25);
+            label2.TabIndex = 22;
+            label2.Text = "minutes";
+            // 
             // NotificationSettingsForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(710, 787);
+            Controls.Add(label2);
+            Controls.Add(label1);
+            Controls.Add(textBoxEmailMinuteLimit);
             Controls.Add(emailtestButton);
             Controls.Add(soundFileLabel);
             Controls.Add(toAddressLabel);
@@ -296,6 +331,8 @@
         private System.Windows.Forms.Label toAddressLabel;
         private System.Windows.Forms.Label soundFileLabel;
         private System.Windows.Forms.Button emailtestButton;
-        
+        private TextBox textBoxEmailMinuteLimit;
+        private Label label1;
+        private Label label2;
     }
 }

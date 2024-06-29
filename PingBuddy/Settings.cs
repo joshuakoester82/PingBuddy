@@ -10,6 +10,7 @@
     public bool UseEmailNotification { get; set; }
     public string SoundAlertFilePath { get; set; }
     public bool UseSoundAlert { get; set; }
+    public int EmailMinuteLimit { get; set; } 
 
     public Settings()
     {

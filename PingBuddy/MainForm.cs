@@ -20,6 +20,7 @@ namespace PingBuddy
         private List<Alert> alertLog = new List<Alert>();
         private Dictionary<string, List<PingResult>> historicalData = new Dictionary<string, List<PingResult>>();
         private Settings appSettings;
+        private DateTime lastNotificationEmailDateTime;
 
         public MainForm()
         {
@@ -505,9 +506,12 @@ namespace PingBuddy
         {
             // First, check if email notifications are enabled
             if (!appSettings.UseEmailNotification)
-            {
-                return; // Exit the method if email notifications are not enabled
-            }
+                return;
+
+            // Check if enough time has passed to send a new email
+            TimeSpan elapsedEmailTime = DateTime.Now - lastNotificationEmailDateTime;
+            if (elapsedEmailTime.TotalMinutes < appSettings.EmailMinuteLimit)
+                return;
 
             // Check if all necessary email parameters are set
             if (string.IsNullOrWhiteSpace(appSettings.EmailSmtpServer) ||
@@ -536,6 +540,9 @@ namespace PingBuddy
                     mailMessage.Body = alert.ToString();
 
                     smtpClient.Send(mailMessage);
+
+                    // update the last sent email DateTime
+                    lastNotificationEmailDateTime = DateTime.Now;
                 }
             }
             catch (Exception ex)
