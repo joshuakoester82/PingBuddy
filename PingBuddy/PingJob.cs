@@ -12,8 +12,6 @@ public class PingJob
     public int ConsecutiveFailures { get; set; }
     public bool PlaySoundOnAlert { get; set; }
     public bool SendEmailOnAlert { get; set; }
-
-    // New properties for tracking pings
     public int TotalPings { get; private set; }
     public int FailedPings { get; private set; }
 
@@ -50,5 +48,10 @@ public class PingJob
     {
         TotalPings = 0;
         FailedPings = 0;
+    }
+
+    public override string ToString()
+    {
+        return Name;
     }
 }

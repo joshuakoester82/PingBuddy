@@ -13,6 +13,8 @@ namespace PingBuddy
         private List<PingJob> pingJobs = new List<PingJob>();
         private BackgroundWorker pingWorker;
         private bool isRunning = false;
+        private List<Alert> alertLog = new List<Alert>();
+        private Dictionary<string, List<PingResult>> historicalData = new Dictionary<string, List<PingResult>>();
 
         public MainForm()
         {
@@ -38,6 +40,13 @@ namespace PingBuddy
 
             curJobPingList.DrawMode = DrawMode.OwnerDrawFixed;
             curJobPingList.DrawItem += CurJobPingList_DrawItem;
+        }
+
+        private class PingResult
+        {
+            public DateTime Timestamp { get; set; }
+            public long Latency { get; set; }
+            public IPStatus Status { get; set; }
         }
 
         private void CurJobPingList_DrawItem(object sender, DrawItemEventArgs e)
@@ -111,13 +120,13 @@ namespace PingBuddy
                 if (reply.RoundtripTime > job.LatencyThreshold)
                 {
                     currentResult += " (High)";
-                    // TODO: Trigger alert
+                    GenerateAlert(job, Alert.AlertType.HighLatency, $"High latency: {reply.RoundtripTime}ms");
                 }
             }
             else
             {
                 currentResult += $"Failed ({reply.Status})";
-                // TODO: Update consecutive failures and trigger alert if necessary
+                GenerateAlert(job, Alert.AlertType.ConnectionLost, $"Connection lost: {reply.Status}");
             }
 
             currentResult += $" | Loss: {job.ApproximatePacketLoss:F1}%";
@@ -125,28 +134,11 @@ namespace PingBuddy
             if (job.ApproximatePacketLoss > job.PacketLossThreshold)
             {
                 currentResult += " (High Loss)";
-                // TODO: Trigger alert
+                GenerateAlert(job, Alert.AlertType.PacketLoss, $"High packet loss: {job.ApproximatePacketLoss:F1}%");
             }
 
             // Update curJobPingList
-            int index = -1;
-            for (int i = 0; i < curJobPingList.Items.Count; i++)
-            {
-                if (curJobPingList.Items[i].ToString().Contains(job.Name))
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            if (index != -1)
-            {
-                curJobPingList.Items[index] = currentResult;
-            }
-            else
-            {
-                curJobPingList.Items.Add(currentResult);
-            }
+            UpdateCurJobPingList(job.Name, currentResult);
 
             // Add to resultList at the top
             resultList.Items.Insert(0, currentResult);
@@ -155,7 +147,52 @@ namespace PingBuddy
                 resultList.Items.RemoveAt(resultList.Items.Count - 1);
             }
 
+            // Store historical data
+            StoreHistoricalData(job.Name, reply);
+
             curJobPingList.Refresh(); // Force redraw to update colors
+        }
+
+        private void UpdateCurJobPingList(string jobName, string result)
+        {
+            for (int i = 0; i < curJobPingList.Items.Count; i++)
+            {
+                if (curJobPingList.Items[i].ToString().Contains(jobName))
+                {
+                    curJobPingList.Items[i] = result;
+                    return;
+                }
+            }
+            // If we didn't find an existing item for this job, add a new one
+            curJobPingList.Items.Add(result);
+        }
+
+        private void GenerateAlert(PingJob job, Alert.AlertType type, string message)
+        {
+            var alert = new Alert(job.Name, message, type);
+            alertLog.Add(alert);
+            alertList.Items.Insert(0, alert.ToString());
+
+            // TODO: Implement additional alert actions (e.g., send email, play sound)
+        }
+
+        private void StoreHistoricalData(string jobName, PingReply reply)
+        {
+            if (!historicalData.ContainsKey(jobName))
+            {
+                historicalData[jobName] = new List<PingResult>();
+            }
+
+            historicalData[jobName].Add(new PingResult
+            {
+                Timestamp = DateTime.Now,
+                Latency = reply.Status == IPStatus.Success ? reply.RoundtripTime : -1,
+                Status = reply.Status
+            });
+
+            // Keep only last 24 hours of data
+            var cutoffTime = DateTime.Now.AddHours(-24);
+            historicalData[jobName] = historicalData[jobName].Where(r => r.Timestamp >= cutoffTime).ToList();
         }
 
         private void PingWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -255,6 +292,29 @@ namespace PingBuddy
             lock (pingJobs)
             {
                 jobList.DataSource = new List<PingJob>(pingJobs);
+            }
+
+            // Update curJobPingList to reflect current jobs
+            List<string> jobsToKeep = pingJobs.Select(j => j.Name).ToList();
+
+            // Remove items for jobs that no longer exist
+            for (int i = curJobPingList.Items.Count - 1; i >= 0; i--)
+            {
+                string itemText = curJobPingList.Items[i].ToString();
+                string jobName = itemText.Split(':')[0].Trim().TrimStart('[').Split(']').Last().Trim();
+                if (!jobsToKeep.Contains(jobName))
+                {
+                    curJobPingList.Items.RemoveAt(i);
+                }
+            }
+
+            // Add placeholder items for new jobs
+            foreach (var job in pingJobs)
+            {
+                if (!curJobPingList.Items.Cast<string>().Any(item => item.Contains(job.Name)))
+                {
+                    curJobPingList.Items.Add($"[{DateTime.Now:HH:mm:ss}] {job.Name}: Waiting for first ping...");
+                }
             }
         }
 
