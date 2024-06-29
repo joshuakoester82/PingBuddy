@@ -101,13 +101,14 @@ namespace PingBuddy
 
         private void UpdatePingResult(PingJob job, PingReply reply)
         {
-            string currentResult = $"{job.Name} - {job.Host}: ";
+            string timestamp = DateTime.Now.ToString("HH:mm:ss");
+            string currentResult = $"[{timestamp}] {job.Name}: ";
             if (reply.Status == IPStatus.Success)
             {
-                currentResult += $"Latency: {reply.RoundtripTime}ms";
+                currentResult += $"{reply.RoundtripTime}ms";
                 if (reply.RoundtripTime > job.LatencyThreshold)
                 {
-                    currentResult += " (High Latency)";
+                    currentResult += " (High)";
                     // TODO: Trigger alert
                 }
             }
@@ -118,7 +119,16 @@ namespace PingBuddy
             }
 
             // Update curJobPingList
-            int index = curJobPingList.FindString(job.Name);
+            int index = -1;
+            for (int i = 0; i < curJobPingList.Items.Count; i++)
+            {
+                if (curJobPingList.Items[i].ToString().Contains(job.Name))
+                {
+                    index = i;
+                    break;
+                }
+            }
+
             if (index != -1)
             {
                 curJobPingList.Items[index] = currentResult;
@@ -128,12 +138,11 @@ namespace PingBuddy
                 curJobPingList.Items.Add(currentResult);
             }
 
-            // Add to resultList with timestamp
-            string timestampedResult = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {currentResult}";
-            resultList.Items.Add(timestampedResult);
-            while (resultList.Items.Count > 100) // Keep only the last 100 results
+            // Add to resultList at the top
+            resultList.Items.Insert(0, currentResult);
+            if (resultList.Items.Count > 100) // Keep only the last 100 results
             {
-                resultList.Items.RemoveAt(0);
+                resultList.Items.RemoveAt(resultList.Items.Count - 1);
             }
 
             curJobPingList.Refresh(); // Force redraw to update colors
@@ -213,11 +222,15 @@ namespace PingBuddy
                     pingJobs.Remove(selectedJob);
                 }
                 UpdateJobList();
+
                 // Remove from curJobPingList
-                int index = curJobPingList.FindString(selectedJob.Name);
-                if (index != -1)
+                for (int i = curJobPingList.Items.Count - 1; i >= 0; i--)
                 {
-                    curJobPingList.Items.RemoveAt(index);
+                    if (curJobPingList.Items[i].ToString().Contains(selectedJob.Name))
+                    {
+                        curJobPingList.Items.RemoveAt(i);
+                        break;
+                    }
                 }
             }
         }

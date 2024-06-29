@@ -56,7 +56,7 @@
             menuStrip.Location = new Point(0, 0);
             menuStrip.Name = "menuStrip";
             menuStrip.Padding = new Padding(10, 4, 0, 4);
-            menuStrip.Size = new Size(1733, 37);
+            menuStrip.Size = new Size(1898, 37);
             menuStrip.TabIndex = 0;
             menuStrip.Text = "menuStrip1";
             // 
@@ -89,14 +89,14 @@
             curJobPingList.Location = new Point(367, 52);
             curJobPingList.Margin = new Padding(5, 6, 5, 6);
             curJobPingList.Name = "curJobPingList";
-            curJobPingList.Size = new Size(331, 754);
+            curJobPingList.Size = new Size(472, 754);
             curJobPingList.TabIndex = 2;
             // 
             // resultList
             // 
             resultList.FormattingEnabled = true;
             resultList.ItemHeight = 25;
-            resultList.Location = new Point(714, 52);
+            resultList.Location = new Point(861, 52);
             resultList.Margin = new Padding(5, 6, 5, 6);
             resultList.Name = "resultList";
             resultList.Size = new Size(497, 754);
@@ -106,7 +106,7 @@
             // 
             alertList.FormattingEnabled = true;
             alertList.ItemHeight = 25;
-            alertList.Location = new Point(1227, 52);
+            alertList.Location = new Point(1381, 52);
             alertList.Margin = new Padding(5, 6, 5, 6);
             alertList.Name = "alertList";
             alertList.Size = new Size(484, 754);
@@ -199,7 +199,7 @@
             statusStrip.Location = new Point(0, 1122);
             statusStrip.Name = "statusStrip";
             statusStrip.Padding = new Padding(2, 0, 23, 0);
-            statusStrip.Size = new Size(1733, 32);
+            statusStrip.Size = new Size(1898, 32);
             statusStrip.TabIndex = 13;
             statusStrip.Text = "statusStrip1";
             // 
@@ -213,7 +213,7 @@
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1733, 1154);
+            ClientSize = new Size(1898, 1154);
             Controls.Add(statusStrip);
             Controls.Add(stopAllJobsButton);
             Controls.Add(startAllJobsButton);
