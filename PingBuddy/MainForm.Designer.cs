@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             menuStrip = new MenuStrip();
             helpMenu = new ToolStripMenuItem();
             jobList = new ListBox();
@@ -190,22 +191,22 @@
             // 
             // startAllJobsButton
             // 
+            startAllJobsButton.Image = (Image)resources.GetObject("startAllJobsButton.Image");
             startAllJobsButton.Location = new Point(1678, 821);
             startAllJobsButton.Margin = new Padding(5, 6, 5, 6);
             startAllJobsButton.Name = "startAllJobsButton";
             startAllJobsButton.Size = new Size(200, 113);
             startAllJobsButton.TabIndex = 16;
-            startAllJobsButton.Text = "Start All Jobs";
             startAllJobsButton.UseVisualStyleBackColor = true;
             // 
             // stopAllJobsButton
             // 
+            stopAllJobsButton.Image = (Image)resources.GetObject("stopAllJobsButton.Image");
             stopAllJobsButton.Location = new Point(1678, 946);
             stopAllJobsButton.Margin = new Padding(5, 6, 5, 6);
             stopAllJobsButton.Name = "stopAllJobsButton";
             stopAllJobsButton.Size = new Size(200, 113);
             stopAllJobsButton.TabIndex = 17;
-            stopAllJobsButton.Text = "Stop All Jobs";
             stopAllJobsButton.UseVisualStyleBackColor = true;
             // 
             // clearResultsButton

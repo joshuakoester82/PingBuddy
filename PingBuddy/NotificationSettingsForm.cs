@@ -46,7 +46,8 @@ namespace PingBuddy
 
         private void EmailTestButton_Click(object sender, EventArgs e)
         {
-             string emailSmtpServer = smtpServerTextBox.Text;
+            
+            string emailSmtpServer = smtpServerTextBox.Text;
              int emailSmtpPort = int.TryParse(smtpPortTextBox.Text, out int port) ? port : 587;
              string emailUsername = usernameTextBox.Text;
              string emailPassword = passwordTextBox.Text;

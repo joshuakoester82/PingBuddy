@@ -1,4 +1,7 @@
-﻿Add test email button
+﻿Add test email button - added 6/29/2024 4:42 pm
+
+Add play and stop icons as buttons for start and end jobs
+Add limiter on email notifications, send every x minutes.
 Add export ping data to CSV
 	Make sure ping data is being saved in an object so it all exists for the CSV
 Add task scheduling and autostart of scheduled tasks.
