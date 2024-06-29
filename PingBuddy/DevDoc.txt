@@ -1,0 +1,5 @@
+﻿Add test email button
+Add export ping data to CSV
+	Make sure ping data is being saved in an object so it all exists for the CSV
+Add task scheduling and autostart of scheduled tasks.
+Add visualizations.

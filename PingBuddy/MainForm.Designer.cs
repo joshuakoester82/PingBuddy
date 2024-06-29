@@ -312,7 +312,7 @@
         #endregion
 
         private System.Windows.Forms.MenuStrip menuStrip;
-        private System.Windows.Forms.ToolStripMenuItem settingsMenu;
+        //private System.Windows.Forms.ToolStripMenuItem settingsMenu; // Possibly remove, possible duplicate.
         private System.Windows.Forms.ToolStripMenuItem helpMenu;
         private System.Windows.Forms.ListBox jobList;
         private System.Windows.Forms.ListBox resultList;
