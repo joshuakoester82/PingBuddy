@@ -1,14 +1,21 @@
-﻿using System.Collections.Generic;
-
-public class Settings
+﻿public class Settings
 {
     public List<PingJob> PingJobs { get; set; }
-    // Add any other global settings here, for example:
-    // public int DefaultInterval { get; set; }
-    // public bool PlaySoundOnAlert { get; set; }
+    public string EmailSmtpServer { get; set; }
+    public int EmailSmtpPort { get; set; }
+    public string EmailUsername { get; set; }
+    public string EmailPassword { get; set; }
+    public string EmailFromAddress { get; set; }
+    public string EmailToAddress { get; set; }
+    public bool UseEmailNotification { get; set; }
+    public string SoundAlertFilePath { get; set; }
+    public bool UseSoundAlert { get; set; }
 
     public Settings()
     {
         PingJobs = new List<PingJob>();
+        EmailSmtpPort = 587; // Default port for TLS
+        UseEmailNotification = false;
+        UseSoundAlert = false;
     }
 }

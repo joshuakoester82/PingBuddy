@@ -7,6 +7,8 @@ using System.Drawing;
 using System.Linq;
 using System.IO;
 using System.Text.Json;
+using System.Media;
+using System.Net.Mail;
 
 namespace PingBuddy
 {
@@ -17,12 +19,14 @@ namespace PingBuddy
         private bool isRunning = false;
         private List<Alert> alertLog = new List<Alert>();
         private Dictionary<string, List<PingResult>> historicalData = new Dictionary<string, List<PingResult>>();
+        private Settings appSettings;
 
         public MainForm()
         {
             InitializeComponent();
             SetupCustomControls();
             SetupPingWorker();
+            LoadSettings();
         }
 
         private void SetupCustomControls()
@@ -43,8 +47,33 @@ namespace PingBuddy
 
             curJobPingList.DrawMode = DrawMode.OwnerDrawFixed;
             curJobPingList.DrawItem += CurJobPingList_DrawItem;
-        }
+            
+            // Add a new button for notification settings
+            Button notificationSettingsButton = new Button
+            {
+                Text = "Notification Settings",
+                Location = new System.Drawing.Point(/* Set appropriate x and y values */),
+                Size = new System.Drawing.Size(150, 30)
+            };
+            notificationSettingsButton.Click += NotificationSettingsButton_Click;
+            this.Controls.Add(notificationSettingsButton);
 
+            // Add settings menu item
+            ToolStripMenuItem settingsMenuItem = new ToolStripMenuItem("Settings");
+            settingsMenuItem.Click += SettingsMenuItem_Click;
+            menuStrip.Items.Add(settingsMenuItem);
+        }
+        private void SettingsMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var settingsForm = new NotificationSettingsForm(appSettings))
+            {
+                if (settingsForm.ShowDialog() == DialogResult.OK)
+                {
+                    appSettings = settingsForm.Settings;
+                    SaveSettings();
+                }
+            }
+        }
         private class PingResult
         {
             public DateTime Timestamp { get; set; }
@@ -176,7 +205,15 @@ namespace PingBuddy
             alertLog.Add(alert);
             alertList.Items.Insert(0, alert.ToString());
 
-            // TODO: Implement additional alert actions (e.g., send email, play sound)
+            if (appSettings.UseSoundAlert)
+            {
+                PlayAlertSound();
+            }
+
+            if (appSettings.UseEmailNotification)
+            {
+                SendEmailAlert(alert);
+            }
         }
 
         private void StoreHistoricalData(string jobName, PingReply reply)
@@ -303,6 +340,7 @@ namespace PingBuddy
             {
                 jobList.DataSource = new List<PingJob>(pingJobs);
             }
+            SaveSettings();
 
             // Update curJobPingList to reflect current jobs
             List<string> jobsToKeep = pingJobs.Select(j => j.Name).ToList();
@@ -400,6 +438,114 @@ namespace PingBuddy
             }
         }
 
+        private void LoadSettings()
+        {
+            string settingsPath = Path.Combine(Application.StartupPath, "settings.json");
+            if (File.Exists(settingsPath))
+            {
+                string jsonString = File.ReadAllText(settingsPath);
+                appSettings = JsonSerializer.Deserialize<Settings>(jsonString);
+            }
+            else
+            {
+                appSettings = new Settings();
+            }
+
+            // Load ping jobs from settings
+            pingJobs = appSettings.PingJobs ?? new List<PingJob>();
+            UpdateJobList();
+        }
+
+        private void SaveSettings()
+        {
+            appSettings.PingJobs = pingJobs;
+            string jsonString = JsonSerializer.Serialize(appSettings, new JsonSerializerOptions { WriteIndented = true });
+            string settingsPath = Path.Combine(Application.StartupPath, "settings.json");
+            File.WriteAllText(settingsPath, jsonString);
+        }
+
+        private void NotificationSettingsButton_Click(object sender, EventArgs e)
+        {
+            using (var settingsForm = new NotificationSettingsForm(appSettings))
+            {
+                if (settingsForm.ShowDialog() == DialogResult.OK)
+                {
+                    appSettings = settingsForm.Settings;
+                    SaveSettings(); // Implement this method to save settings to file
+                }
+            }
+        }
+
+        private void PlayAlertSound()
+        {
+            if (appSettings.UseSoundAlert)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(appSettings.SoundAlertFilePath) && File.Exists(appSettings.SoundAlertFilePath))
+                    {
+                        using (var player = new SoundPlayer(appSettings.SoundAlertFilePath))
+                        {
+                            player.Play();
+                        }
+                    }
+                    else
+                    {
+                        SystemSounds.Exclamation.Play();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error playing alert sound: {ex.Message}");
+                }
+            }
+        }
+
+        private void SendEmailAlert(Alert alert)
+        {
+            // First, check if email notifications are enabled
+            if (!appSettings.UseEmailNotification)
+            {
+                return; // Exit the method if email notifications are not enabled
+            }
+
+            // Check if all necessary email parameters are set
+            if (string.IsNullOrWhiteSpace(appSettings.EmailSmtpServer) ||
+                appSettings.EmailSmtpPort == 0 ||
+                string.IsNullOrWhiteSpace(appSettings.EmailUsername) ||
+                string.IsNullOrWhiteSpace(appSettings.EmailPassword) ||
+                string.IsNullOrWhiteSpace(appSettings.EmailFromAddress) ||
+                string.IsNullOrWhiteSpace(appSettings.EmailToAddress))
+            {
+                // Log this issue or show a message to the user
+                Console.WriteLine("Email alert not sent: Email settings are incomplete.");
+                return;
+            }
+
+            try
+            {
+                using (SmtpClient smtpClient = new SmtpClient(appSettings.EmailSmtpServer, appSettings.EmailSmtpPort))
+                {
+                    smtpClient.Credentials = new System.Net.NetworkCredential(appSettings.EmailUsername, appSettings.EmailPassword);
+                    smtpClient.EnableSsl = true;
+
+                    MailMessage mailMessage = new MailMessage();
+                    mailMessage.From = new MailAddress(appSettings.EmailFromAddress);
+                    mailMessage.To.Add(appSettings.EmailToAddress);
+                    mailMessage.Subject = $"Ping Alert: {alert.JobName}";
+                    mailMessage.Body = alert.ToString();
+
+                    smtpClient.Send(mailMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error or show a message to the user
+                Console.WriteLine($"Error sending email alert: {ex.Message}");
+                // Optionally, you can show a message box or log this error
+                // MessageBox.Show($"Error sending email alert: {ex.Message}", "Email Alert Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (pingWorker.IsBusy)
