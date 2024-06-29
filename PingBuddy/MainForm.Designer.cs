@@ -6,6 +6,7 @@
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.Button clearResultsButton;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -43,10 +44,12 @@
             importSettingsButton = new Button();
             startAllJobsButton = new Button();
             stopAllJobsButton = new Button();
+            clearResultsButton = new Button();
             statusStrip = new StatusStrip();
             statusLabel = new ToolStripStatusLabel();
             menuStrip.SuspendLayout();
             statusStrip.SuspendLayout();
+            
             SuspendLayout();
             // 
             // menuStrip
@@ -209,6 +212,15 @@
             statusLabel.Size = new Size(60, 25);
             statusLabel.Text = "Ready";
             // 
+            // clearResultsButton
+            // 
+            clearResultsButton.Location = new Point(714, 904); // Adjust as needed
+            clearResultsButton.Name = "clearResultsButton";
+            clearResultsButton.Size = new Size(125, 44);
+            clearResultsButton.TabIndex = 14; // Adjust if needed
+            clearResultsButton.Text = "Clear Results";
+            clearResultsButton.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -228,6 +240,7 @@
             Controls.Add(curJobPingList);
             Controls.Add(jobList);
             Controls.Add(menuStrip);
+            Controls.Add(clearResultsButton);
             MainMenuStrip = menuStrip;
             Margin = new Padding(5, 6, 5, 6);
             Name = "MainForm";

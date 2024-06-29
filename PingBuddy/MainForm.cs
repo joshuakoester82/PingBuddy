@@ -31,6 +31,7 @@ namespace PingBuddy
             importSettingsButton.Click += ImportSettingsButton_Click;
             startAllJobsButton.Click += StartAllJobsButton_Click;
             stopAllJobsButton.Click += StopAllJobsButton_Click;
+            clearResultsButton.Click += ClearResultsButton_Click;
 
             jobList.DisplayMember = "Name";
             jobList.ValueMember = "Host";
@@ -103,6 +104,7 @@ namespace PingBuddy
         {
             string timestamp = DateTime.Now.ToString("HH:mm:ss");
             string currentResult = $"[{timestamp}] {job.Name}: ";
+
             if (reply.Status == IPStatus.Success)
             {
                 currentResult += $"{reply.RoundtripTime}ms";
@@ -116,6 +118,14 @@ namespace PingBuddy
             {
                 currentResult += $"Failed ({reply.Status})";
                 // TODO: Update consecutive failures and trigger alert if necessary
+            }
+
+            currentResult += $" | Loss: {job.ApproximatePacketLoss:F1}%";
+
+            if (job.ApproximatePacketLoss > job.PacketLossThreshold)
+            {
+                currentResult += " (High Loss)";
+                // TODO: Trigger alert
             }
 
             // Update curJobPingList
@@ -233,6 +243,10 @@ namespace PingBuddy
                     }
                 }
             }
+        }
+        private void ClearResultsButton_Click(object sender, EventArgs e)
+        {
+            resultList.Items.Clear();
         }
 
         private void UpdateJobList()
