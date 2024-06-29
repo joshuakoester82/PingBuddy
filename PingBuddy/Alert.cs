@@ -22,6 +22,7 @@
 
     public override string ToString()
     {
-        return $"[{Timestamp:yyyy-MM-dd HH:mm:ss}] {JobName}: {Message}";
+        return $"[{Timestamp:HH:mm:ss}] {JobName}: {Message}";
     }
 }
+

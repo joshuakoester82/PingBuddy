@@ -45,6 +45,7 @@
             startAllJobsButton = new Button();
             stopAllJobsButton = new Button();
             clearResultsButton = new Button();
+            clearAlertsButton = new Button();
             statusStrip = new StatusStrip();
             statusLabel = new ToolStripStatusLabel();
             menuStrip.SuspendLayout();
@@ -221,6 +222,15 @@
             clearResultsButton.Text = "Clear Results";
             clearResultsButton.UseVisualStyleBackColor = true;
             // 
+            // clearAlertsButton
+            // 
+            clearAlertsButton.Location = new Point(883, 846); // Adjust as needed
+            clearAlertsButton.Name = "clearAlertsButton";
+            clearAlertsButton.Size = new Size(125, 44);
+            clearAlertsButton.TabIndex = 15; // Adjust if needed
+            clearAlertsButton.Text = "Clear Alerts";
+            clearAlertsButton.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -241,6 +251,7 @@
             Controls.Add(jobList);
             Controls.Add(menuStrip);
             Controls.Add(clearResultsButton);
+            Controls.Add(clearAlertsButton);
             MainMenuStrip = menuStrip;
             Margin = new Padding(5, 6, 5, 6);
             Name = "MainForm";
@@ -270,6 +281,7 @@
         private Button importSettingsButton;
         private Button startAllJobsButton;
         private Button stopAllJobsButton;
+        private Button clearAlertsButton;
         private StatusStrip statusStrip;
         private ToolStripStatusLabel statusLabel;
     }

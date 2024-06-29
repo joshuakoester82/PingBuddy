@@ -36,6 +36,7 @@ namespace PingBuddy
             startAllJobsButton.Click += StartAllJobsButton_Click;
             stopAllJobsButton.Click += StopAllJobsButton_Click;
             clearResultsButton.Click += ClearResultsButton_Click;
+            clearAlertsButton.Click += ClearAlertsButton_Click;
 
             jobList.DisplayMember = "Name";
             jobList.ValueMember = "Host";
@@ -283,9 +284,16 @@ namespace PingBuddy
                 }
             }
         }
+
         private void ClearResultsButton_Click(object sender, EventArgs e)
         {
             resultList.Items.Clear();
+        }
+
+        private void ClearAlertsButton_Click(object sender, EventArgs e)
+        {
+            alertList.Items.Clear();
+            alertLog.Clear();
         }
 
         private void UpdateJobList()
