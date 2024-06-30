@@ -9,7 +9,9 @@
     {
         HighLatency,
         PacketLoss,
-        ConnectionLost
+        ConnectionLost,
+        NetworkError,
+        HostError
     }
 
     public Alert(string jobName, string message, AlertType type)

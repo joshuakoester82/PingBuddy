@@ -2,6 +2,6 @@
 Add play and stop icons as buttons for start and end jobs - added 6/29/24
 Add limiter on email notifications, send every x minutes. - added 6/29/24
 Add export ping data to CSV - added 6/29/24
+Add visualizations. - added 6/30/24
+Add a network form that gives the status of the network. - added 6/29/24
 Add task scheduling and autostart of scheduled tasks.
-Add visualizations.
-Add a network form that gives the status of the network.

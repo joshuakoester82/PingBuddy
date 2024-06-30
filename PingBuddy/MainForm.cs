@@ -123,7 +123,7 @@ namespace PingBuddy
                 {
                     if (pingWorker.CancellationPending) break;
 
-                    PingReply reply = job.Ping();
+                    PingReply? reply = job.Ping();
                     this.Invoke((MethodInvoker)delegate
                     {
                         UpdatePingResult(job, reply);
@@ -133,12 +133,12 @@ namespace PingBuddy
                 }
             }
         }
-        private void UpdatePingResult(PingJob job, PingReply reply)
+        private void UpdatePingResult(PingJob job, PingReply? reply)
         {
             string timestamp = DateTime.Now.ToString("HH:mm:ss");
             string currentResult = $"[{timestamp}] {job.Name}: ";
 
-            if (reply.Status == IPStatus.Success)
+            if (reply != null && reply.Status == IPStatus.Success)
             {
                 currentResult += $"{reply.RoundtripTime}ms";
                 if (reply.RoundtripTime > job.LatencyThreshold)
@@ -149,8 +149,8 @@ namespace PingBuddy
             }
             else
             {
-                currentResult += $"Failed ({reply.Status})";
-                GenerateAlert(job, Alert.AlertType.ConnectionLost, $"Connection lost: {reply.Status}");
+                currentResult += $"Failed ({reply?.Status ?? IPStatus.Unknown})";
+                GenerateAlert(job, Alert.AlertType.ConnectionLost, $"Connection lost: {reply?.Status ?? IPStatus.Unknown}");
             }
 
             currentResult += $" | Loss: {job.ApproximatePacketLoss:F1}%";
@@ -240,7 +240,7 @@ namespace PingBuddy
                 }
             }
         }
-        private void StoreHistoricalData(string jobName, PingReply reply)
+        private void StoreHistoricalData(string jobName, PingReply? reply)
         {
             if (!historicalData.ContainsKey(jobName))
             {
@@ -250,8 +250,8 @@ namespace PingBuddy
             historicalData[jobName].Add(new PingResult
             {
                 Timestamp = DateTime.Now,
-                Latency = reply.Status == IPStatus.Success ? reply.RoundtripTime : -1,
-                Status = reply.Status
+                Latency = reply?.Status == IPStatus.Success ? reply.RoundtripTime : -1,
+                Status = reply?.Status ?? IPStatus.Unknown
             });
 
             // Keep only last 24 hours of data
@@ -395,7 +395,7 @@ namespace PingBuddy
                 if (settingsForm.ShowDialog() == DialogResult.OK)
                 {
                     appSettings = settingsForm.Settings;
-                    SaveSettings(); // Implement this method to save settings to file
+                    SaveSettings(); 
                 }
             }
         }
@@ -672,6 +672,7 @@ namespace PingBuddy
                 pingWorker.CancelAsync();
                 pingWorker.Dispose();
             }
+            SaveSettings();
             base.OnFormClosing(e);
         }
     }

@@ -34,32 +34,52 @@ public class PingJob
     {
         using (var pinger = new Ping())
         {
-            byte[] buffer = new byte[BufferSize];
-            new Random().NextBytes(buffer);
-            var reply = pinger.Send(Host, Timeout, buffer);
-
-            var result = new PingResult
+            try
             {
-                Timestamp = DateTime.Now,
-                Status = reply.Status,
-                Latency = reply.Status == IPStatus.Success ? reply.RoundtripTime : -1
-            };
-
-            // Check for alerts
-            if (reply.Status != IPStatus.Success)
-            {
-                result.AlertType = Alert.AlertType.ConnectionLost;
-                result.AlertMessage = $"Connection lost: {reply.Status}";
+                byte[] buffer = new byte[BufferSize];
+                new Random().NextBytes(buffer);
+                var reply = pinger.Send(Host, Timeout, buffer);
+                var result = new PingResult
+                {
+                    Timestamp = DateTime.Now,
+                    Status = reply.Status,
+                    Latency = reply.Status == IPStatus.Success ? reply.RoundtripTime : -1
+                };
+                // Check for alerts
+                if (reply.Status != IPStatus.Success)
+                {
+                    result.AlertType = Alert.AlertType.ConnectionLost;
+                    result.AlertMessage = $"Connection lost: {reply.Status}";
+                }
+                else if (reply.RoundtripTime > LatencyThreshold)
+                {
+                    result.AlertType = Alert.AlertType.HighLatency;
+                    result.AlertMessage = $"High latency: {reply.RoundtripTime}ms";
+                }
+                PingResults.Add(result);
+                return reply;
             }
-            else if (reply.RoundtripTime > LatencyThreshold)
+            catch (Exception e)
             {
-                result.AlertType = Alert.AlertType.HighLatency;
-                result.AlertMessage = $"High latency: {reply.RoundtripTime}ms";
+                Console.WriteLine($"Error pinging {Host}: {e.Message}");
+
+                // Create and add an error PingResult
+                var errorResult = new PingResult
+                {
+                    Timestamp = DateTime.Now,
+                    Status = IPStatus.Unknown,
+                    Latency = -1,
+                    AlertType = Alert.AlertType.ConnectionLost,  // Using existing AlertType
+                    AlertMessage = $"Error: {e.Message}"
+                };
+                PingResults.Add(errorResult);
+
+                // Optionally show a message box (consider removing this in production)
+                MessageBox.Show($"Error pinging {Host}: {e.Message} Is the host invalid?", "Ping Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // Return a default PingReply object
+                return null;
             }
-
-            PingResults.Add(result);
-
-            return reply;
         }
     }
 
