@@ -9,6 +9,9 @@ using System.IO;
 using System.Text.Json;
 using System.Media;
 using System.Net.Mail;
+using System.Formats.Asn1;
+using CsvHelper;
+using CsvHelper.Configuration;
 
 namespace PingBuddy
 {
@@ -28,16 +31,14 @@ namespace PingBuddy
             SetupCustomControls();
             SetupPingWorker();
             LoadSettings();
+            WireUpMenuItems();
         }
-
         private void SetupCustomControls()
         {
             addJobButton.Click += AddJobButton_Click;
             editJobButton.Click += EditJobButton_Click;
             removeJobButton.Click += RemoveJobButton_Click;
             viewChartButton.Click += ViewChartButton_Click;
-            exportSettingsButton.Click += ExportSettingsButton_Click;
-            importSettingsButton.Click += ImportSettingsButton_Click;
             startAllJobsButton.Click += StartAllJobsButton_Click;
             stopAllJobsButton.Click += StopAllJobsButton_Click;
             clearResultsButton.Click += ClearResultsButton_Click;
@@ -48,7 +49,7 @@ namespace PingBuddy
 
             curJobPingList.DrawMode = DrawMode.OwnerDrawFixed;
             curJobPingList.DrawItem += CurJobPingList_DrawItem;
-            
+
             // Add a new button for notification settings
             Button notificationSettingsButton = new Button
             {
@@ -75,13 +76,6 @@ namespace PingBuddy
                 }
             }
         }
-        private class PingResult
-        {
-            public DateTime Timestamp { get; set; }
-            public long Latency { get; set; }
-            public IPStatus Status { get; set; }
-        }
-
         private void CurJobPingList_DrawItem(object sender, DrawItemEventArgs e)
         {
             if (e.Index < 0) return;
@@ -108,7 +102,6 @@ namespace PingBuddy
             g.DrawString(item, e.Font, new SolidBrush(textColor), e.Bounds);
             e.DrawFocusRectangle();
         }
-
         private void SetupPingWorker()
         {
             pingWorker = new BackgroundWorker();
@@ -116,7 +109,6 @@ namespace PingBuddy
             pingWorker.DoWork += PingWorker_DoWork;
             pingWorker.RunWorkerCompleted += PingWorker_RunWorkerCompleted;
         }
-
         private void PingWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             while (!pingWorker.CancellationPending)
@@ -141,7 +133,6 @@ namespace PingBuddy
                 }
             }
         }
-
         private void UpdatePingResult(PingJob job, PingReply reply)
         {
             string timestamp = DateTime.Now.ToString("HH:mm:ss");
@@ -185,7 +176,6 @@ namespace PingBuddy
 
             curJobPingList.Refresh(); // Force redraw to update colors
         }
-
         private void UpdateCurJobPingList(string jobName, string result)
         {
             for (int i = 0; i < curJobPingList.Items.Count; i++)
@@ -199,7 +189,19 @@ namespace PingBuddy
             // If we didn't find an existing item for this job, add a new one
             curJobPingList.Items.Add(result);
         }
-
+        private void UpdateCurrentJobPingList()
+        {
+            curJobPingList.Items.Clear();
+            foreach (var job in pingJobs)
+            {
+                var latestResult = job.PingResults.OrderByDescending(r => r.Timestamp).FirstOrDefault();
+                if (latestResult != null)
+                {
+                    string status = latestResult.Status == IPStatus.Success ? "Success" : "Failed";
+                    curJobPingList.Items.Add($"{job.Name}: {status} - {latestResult.Latency}ms");
+                }
+            }
+        }
         private void GenerateAlert(PingJob job, Alert.AlertType type, string message)
         {
             var alert = new Alert(job.Name, message, type);
@@ -216,7 +218,28 @@ namespace PingBuddy
                 SendEmailAlert(alert);
             }
         }
-
+        private void UpdateResultList()
+        {
+            resultList.Items.Clear();
+            foreach (var job in pingJobs)
+            {
+                foreach (var result in job.PingResults.OrderByDescending(r => r.Timestamp).Take(100)) // Show last 100 results
+                {
+                    resultList.Items.Add($"{result.Timestamp} - {job.Name}: {result.Status} - {result.Latency}ms");
+                }
+            }
+        }
+        private void UpdateAlertList()
+        {
+            alertList.Items.Clear();
+            foreach (var job in pingJobs)
+            {
+                foreach (var result in job.PingResults.Where(r => r.AlertType.HasValue).OrderByDescending(r => r.Timestamp).Take(100)) // Show last 100 alerts
+                {
+                    alertList.Items.Add($"{result.Timestamp} - {job.Name}: {result.AlertType} - {result.AlertMessage}");
+                }
+            }
+        }
         private void StoreHistoricalData(string jobName, PingReply reply)
         {
             if (!historicalData.ContainsKey(jobName))
@@ -235,7 +258,6 @@ namespace PingBuddy
             var cutoffTime = DateTime.Now.AddHours(-24);
             historicalData[jobName] = historicalData[jobName].Where(r => r.Timestamp >= cutoffTime).ToList();
         }
-
         private void PingWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
@@ -245,7 +267,6 @@ namespace PingBuddy
             isRunning = false;
             UpdateButtonStates();
         }
-
         private void StartAllJobsButton_Click(object sender, EventArgs e)
         {
             if (!isRunning)
@@ -255,7 +276,6 @@ namespace PingBuddy
                 UpdateButtonStates();
             }
         }
-
         private void StopAllJobsButton_Click(object sender, EventArgs e)
         {
             if (isRunning)
@@ -265,13 +285,11 @@ namespace PingBuddy
                 UpdateButtonStates();
             }
         }
-
         private void UpdateButtonStates()
         {
             startAllJobsButton.Enabled = !isRunning;
             stopAllJobsButton.Enabled = isRunning;
         }
-
         private void AddJobButton_Click(object sender, EventArgs e)
         {
             using (var addJobForm = new AddEditJobForm())
@@ -286,7 +304,6 @@ namespace PingBuddy
                 }
             }
         }
-
         private void EditJobButton_Click(object sender, EventArgs e)
         {
             if (jobList.SelectedItem is PingJob selectedJob)
@@ -300,7 +317,6 @@ namespace PingBuddy
                 }
             }
         }
-
         private void RemoveJobButton_Click(object sender, EventArgs e)
         {
             if (jobList.SelectedItem is PingJob selectedJob)
@@ -322,123 +338,26 @@ namespace PingBuddy
                 }
             }
         }
-
         private void ClearResultsButton_Click(object sender, EventArgs e)
         {
             resultList.Items.Clear();
         }
-
         private void ClearAlertsButton_Click(object sender, EventArgs e)
         {
             alertList.Items.Clear();
             alertLog.Clear();
         }
-
         private void UpdateJobList()
         {
             jobList.DataSource = null;
-            lock (pingJobs)
-            {
-                jobList.DataSource = new List<PingJob>(pingJobs);
-            }
-            SaveSettings();
-
-            // Update curJobPingList to reflect current jobs
-            List<string> jobsToKeep = pingJobs.Select(j => j.Name).ToList();
-
-            // Remove items for jobs that no longer exist
-            for (int i = curJobPingList.Items.Count - 1; i >= 0; i--)
-            {
-                string itemText = curJobPingList.Items[i].ToString();
-                string jobName = itemText.Split(':')[0].Trim().TrimStart('[').Split(']').Last().Trim();
-                if (!jobsToKeep.Contains(jobName))
-                {
-                    curJobPingList.Items.RemoveAt(i);
-                }
-            }
-
-            // Add placeholder items for new jobs
-            foreach (var job in pingJobs)
-            {
-                if (!curJobPingList.Items.Cast<string>().Any(item => item.Contains(job.Name)))
-                {
-                    curJobPingList.Items.Add($"[{DateTime.Now:HH:mm:ss}] {job.Name}: Waiting for first ping...");
-                }
-            }
+            jobList.DataSource = new BindingList<PingJob>(pingJobs);
+            jobList.DisplayMember = "Name";
+            jobList.ValueMember = "Host";
         }
-
         private void ViewChartButton_Click(object sender, EventArgs e)
         {
             // TODO: Implement view chart functionality
         }
-
-        private void ExportSettingsButton_Click(object sender, EventArgs e)
-        {
-            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
-            {
-                saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
-                saveFileDialog.FilterIndex = 1;
-                saveFileDialog.RestoreDirectory = true;
-
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    try
-                    {
-                        Settings settings = new Settings
-                        {
-                            PingJobs = pingJobs
-                        };
-
-                        string jsonString = JsonSerializer.Serialize(settings, new JsonSerializerOptions
-                        {
-                            WriteIndented = true
-                        });
-
-                        File.WriteAllText(saveFileDialog.FileName, jsonString);
-                        MessageBox.Show("Settings exported successfully!", "Export Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error exporting settings: {ex.Message}", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-        }
-
-        private void ImportSettingsButton_Click(object sender, EventArgs e)
-        {
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
-            {
-                openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
-                openFileDialog.FilterIndex = 1;
-                openFileDialog.RestoreDirectory = true;
-
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    try
-                    {
-                        string jsonString = File.ReadAllText(openFileDialog.FileName);
-                        Settings settings = JsonSerializer.Deserialize<Settings>(jsonString);
-
-                        if (settings != null && settings.PingJobs != null)
-                        {
-                            pingJobs = settings.PingJobs;
-                            UpdateJobList();
-                            MessageBox.Show("Settings imported successfully!", "Import Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-                        else
-                        {
-                            MessageBox.Show("The imported file doesn't contain valid settings.", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error importing settings: {ex.Message}", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
-        }
-
         private void LoadSettings()
         {
             string settingsPath = Path.Combine(Application.StartupPath, "settings.json");
@@ -456,7 +375,6 @@ namespace PingBuddy
             pingJobs = appSettings.PingJobs ?? new List<PingJob>();
             UpdateJobList();
         }
-
         private void SaveSettings()
         {
             appSettings.PingJobs = pingJobs;
@@ -464,7 +382,6 @@ namespace PingBuddy
             string settingsPath = Path.Combine(Application.StartupPath, "settings.json");
             File.WriteAllText(settingsPath, jsonString);
         }
-
         private void NotificationSettingsButton_Click(object sender, EventArgs e)
         {
             using (var settingsForm = new NotificationSettingsForm(appSettings))
@@ -476,7 +393,6 @@ namespace PingBuddy
                 }
             }
         }
-
         private void PlayAlertSound()
         {
             if (appSettings.UseSoundAlert)
@@ -501,7 +417,6 @@ namespace PingBuddy
                 }
             }
         }
-
         private void SendEmailAlert(Alert alert)
         {
             // First, check if email notifications are enabled
@@ -551,6 +466,191 @@ namespace PingBuddy
                 Console.WriteLine($"Error sending email alert: {ex.Message}");
                 // Optionally, you can show a message box or log this error
                 // MessageBox.Show($"Error sending email alert: {ex.Message}", "Email Alert Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void WireUpMenuItems()
+        {
+            importJobsToolStripMenuItem.Click += ImportJobsToolStripMenuItem_Click;
+            exportJobsToolStripMenuItem.Click += ExportJobsToolStripMenuItem_Click;
+            importPingHistoryToolStripMenuItem.Click += ImportPingHistoryToolStripMenuItem_Click;
+            exportPingHistoryToolStripMenuItem.Click += ExportPingHistoryToolStripMenuItem_Click;
+        }
+        private void ImportJobsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string jsonString = File.ReadAllText(openFileDialog.FileName);
+                        Settings settings = JsonSerializer.Deserialize<Settings>(jsonString);
+
+                        if (settings != null && settings.PingJobs != null)
+                        {
+                            pingJobs = settings.PingJobs;
+                            UpdateJobList();
+                            MessageBox.Show("Jobs imported successfully!", "Import Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("The imported file doesn't contain valid jobs.", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error importing jobs: {ex.Message}", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+        private void ExportJobsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
+                saveFileDialog.FilterIndex = 1;
+                saveFileDialog.RestoreDirectory = true;
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        Settings settings = new Settings
+                        {
+                            PingJobs = pingJobs
+                        };
+
+                        string jsonString = JsonSerializer.Serialize(settings, new JsonSerializerOptions
+                        {
+                            WriteIndented = true
+                        });
+
+                        File.WriteAllText(saveFileDialog.FileName, jsonString);
+                        MessageBox.Show("Jobs exported successfully!", "Export Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error exporting jobs: {ex.Message}", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+        private void ImportPingHistoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "CSV files (*.csv)|*.csv";
+                openFileDialog.FilterIndex = 1;
+                openFileDialog.RestoreDirectory = true;
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        using (var reader = new StreamReader(openFileDialog.FileName))
+                        using (var csv = new CsvReader(reader, new CsvConfiguration(System.Globalization.CultureInfo.InvariantCulture)))
+                        {
+                            var records = csv.GetRecords<PingHistoryRecord>().ToList();
+
+                            pingJobs.Clear();
+
+                            foreach (var record in records)
+                            {
+                                // Find or create job
+                                var job = pingJobs.FirstOrDefault(j => j.Name == record.JobName);
+                                if (job == null)
+                                {
+                                    job = new PingJob { Name = record.JobName, Host = record.Host };
+                                    pingJobs.Add(job);
+                                }
+
+                                // Add ping result
+                                var result = new PingResult
+                                {
+                                    Timestamp = record.Timestamp,
+                                    Status = Enum.Parse<IPStatus>(record.Status),
+                                    Latency = record.Latency
+                                };
+
+                                // Add alert if present
+                                if (!string.IsNullOrEmpty(record.AlertType))
+                                {
+                                    result.AlertType = Enum.Parse<Alert.AlertType>(record.AlertType);
+                                    result.AlertMessage = record.AlertMessage;
+                                }
+
+                                job.PingResults.Add(result);
+                            }
+
+                            UpdateJobList();
+                            UpdateCurrentJobPingList();
+                            UpdateResultList();
+                            UpdateAlertList();
+
+                            MessageBox.Show("Ping history imported successfully!", "Import Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error importing ping history: {ex.Message}", "Import Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+        private void ExportPingHistoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "CSV files (*.csv)|*.csv";
+                saveFileDialog.FilterIndex = 1;
+                saveFileDialog.RestoreDirectory = true;
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        using (var writer = new StreamWriter(saveFileDialog.FileName))
+                        using (var csv = new CsvWriter(writer, new CsvConfiguration(System.Globalization.CultureInfo.InvariantCulture)))
+                        {
+                            // Write header
+                            csv.WriteField("Timestamp");
+                            csv.WriteField("Job Name");
+                            csv.WriteField("Host");
+                            csv.WriteField("Status");
+                            csv.WriteField("Latency (ms)");
+                            csv.WriteField("Alert Type");
+                            csv.WriteField("Alert Message");
+                            csv.NextRecord();
+
+                            // Write data
+                            foreach (var job in pingJobs)
+                            {
+                                foreach (var result in job.PingResults)
+                                {
+                                    csv.WriteField(result.Timestamp);
+                                    csv.WriteField(job.Name);
+                                    csv.WriteField(job.Host);
+                                    csv.WriteField(result.Status);
+                                    csv.WriteField(result.Latency);
+                                    csv.WriteField(result.AlertType?.ToString() ?? "");
+                                    csv.WriteField(result.AlertMessage ?? "");
+                                    csv.NextRecord();
+                                }
+                            }
+                        }
+
+                        MessageBox.Show("Ping history exported successfully!", "Export Successful", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error exporting ping history: {ex.Message}", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
             }
         }
         protected override void OnFormClosing(FormClosingEventArgs e)

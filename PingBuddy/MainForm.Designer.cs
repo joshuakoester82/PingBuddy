@@ -30,7 +30,13 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             menuStrip = new MenuStrip();
-            helpMenu = new ToolStripMenuItem();
+            fileMenu = new ToolStripMenuItem();
+            toolStripMenuItem1 = new ToolStripMenuItem();
+            importJobsToolStripMenuItem = new ToolStripMenuItem();
+            exportJobsToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem2 = new ToolStripMenuItem();
+            importPingHistoryToolStripMenuItem = new ToolStripMenuItem();
+            exportPingHistoryToolStripMenuItem = new ToolStripMenuItem();
             jobList = new ListBox();
             resultList = new ListBox();
             alertList = new ListBox();
@@ -39,8 +45,6 @@
             editJobButton = new Button();
             removeJobButton = new Button();
             viewChartButton = new Button();
-            exportSettingsButton = new Button();
-            importSettingsButton = new Button();
             statusStrip = new StatusStrip();
             statusLabel = new ToolStripStatusLabel();
             startAllJobsButton = new Button();
@@ -51,6 +55,8 @@
             curJobPingListHeaderLabel = new Label();
             resultListHeaderLabel = new Label();
             alertListHeaderLabel = new Label();
+            toolStripMenuItem3 = new ToolStripMenuItem();
+            toolStripMenuItem4 = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             statusStrip.SuspendLayout();
             SuspendLayout();
@@ -58,7 +64,7 @@
             // menuStrip
             // 
             menuStrip.ImageScalingSize = new Size(24, 24);
-            menuStrip.Items.AddRange(new ToolStripItem[] { helpMenu });
+            menuStrip.Items.AddRange(new ToolStripItem[] { fileMenu, toolStripMenuItem3 });
             menuStrip.Location = new Point(0, 0);
             menuStrip.Name = "menuStrip";
             menuStrip.Padding = new Padding(10, 4, 0, 4);
@@ -66,11 +72,51 @@
             menuStrip.TabIndex = 0;
             menuStrip.Text = "menuStrip1";
             // 
-            // helpMenu
+            // fileMenu
             // 
-            helpMenu.Name = "helpMenu";
-            helpMenu.Size = new Size(65, 29);
-            helpMenu.Text = "Help";
+            fileMenu.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem1, toolStripMenuItem2 });
+            fileMenu.Name = "fileMenu";
+            fileMenu.Size = new Size(54, 29);
+            fileMenu.Text = "File";
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.DropDownItems.AddRange(new ToolStripItem[] { importJobsToolStripMenuItem, exportJobsToolStripMenuItem });
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(270, 34);
+            toolStripMenuItem1.Text = "Jobs";
+            toolStripMenuItem1.ToolTipText = "Jobs";
+            // 
+            // importJobsToolStripMenuItem
+            // 
+            importJobsToolStripMenuItem.Name = "importJobsToolStripMenuItem";
+            importJobsToolStripMenuItem.Size = new Size(210, 34);
+            importJobsToolStripMenuItem.Text = "Import Jobs";
+            // 
+            // exportJobsToolStripMenuItem
+            // 
+            exportJobsToolStripMenuItem.Name = "exportJobsToolStripMenuItem";
+            exportJobsToolStripMenuItem.Size = new Size(210, 34);
+            exportJobsToolStripMenuItem.Text = "Export Jobs";
+            // 
+            // toolStripMenuItem2
+            // 
+            toolStripMenuItem2.DropDownItems.AddRange(new ToolStripItem[] { importPingHistoryToolStripMenuItem, exportPingHistoryToolStripMenuItem });
+            toolStripMenuItem2.Name = "toolStripMenuItem2";
+            toolStripMenuItem2.Size = new Size(270, 34);
+            toolStripMenuItem2.Text = "Ping History";
+            // 
+            // importPingHistoryToolStripMenuItem
+            // 
+            importPingHistoryToolStripMenuItem.Name = "importPingHistoryToolStripMenuItem";
+            importPingHistoryToolStripMenuItem.Size = new Size(271, 34);
+            importPingHistoryToolStripMenuItem.Text = "Import Ping History";
+            // 
+            // exportPingHistoryToolStripMenuItem
+            // 
+            exportPingHistoryToolStripMenuItem.Name = "exportPingHistoryToolStripMenuItem";
+            exportPingHistoryToolStripMenuItem.Size = new Size(271, 34);
+            exportPingHistoryToolStripMenuItem.Text = "Export Ping History";
             // 
             // jobList
             // 
@@ -151,26 +197,6 @@
             viewChartButton.TabIndex = 8;
             viewChartButton.Text = "View Chart";
             viewChartButton.UseVisualStyleBackColor = true;
-            // 
-            // exportSettingsButton
-            // 
-            exportSettingsButton.Location = new Point(233, 1040);
-            exportSettingsButton.Margin = new Padding(5, 6, 5, 6);
-            exportSettingsButton.Name = "exportSettingsButton";
-            exportSettingsButton.Size = new Size(200, 58);
-            exportSettingsButton.TabIndex = 9;
-            exportSettingsButton.Text = "Export Settings";
-            exportSettingsButton.UseVisualStyleBackColor = true;
-            // 
-            // importSettingsButton
-            // 
-            importSettingsButton.Location = new Point(23, 1040);
-            importSettingsButton.Margin = new Padding(5, 6, 5, 6);
-            importSettingsButton.Name = "importSettingsButton";
-            importSettingsButton.Size = new Size(200, 58);
-            importSettingsButton.TabIndex = 10;
-            importSettingsButton.Text = "Import Settings";
-            importSettingsButton.UseVisualStyleBackColor = true;
             // 
             // statusStrip
             // 
@@ -273,6 +299,19 @@
             alertListHeaderLabel.TabIndex = 15;
             alertListHeaderLabel.Text = "Alerts";
             // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem4 });
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new Size(95, 29);
+            toolStripMenuItem3.Text = "Network";
+            // 
+            // toolStripMenuItem4
+            // 
+            toolStripMenuItem4.Name = "toolStripMenuItem4";
+            toolStripMenuItem4.Size = new Size(270, 34);
+            toolStripMenuItem4.Text = "Network Details";
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -287,8 +326,6 @@
             Controls.Add(curJobPingListHeaderLabel);
             Controls.Add(jobListHeaderLabel);
             Controls.Add(statusStrip);
-            Controls.Add(importSettingsButton);
-            Controls.Add(exportSettingsButton);
             Controls.Add(viewChartButton);
             Controls.Add(removeJobButton);
             Controls.Add(editJobButton);
@@ -313,8 +350,7 @@
         #endregion
 
         private System.Windows.Forms.MenuStrip menuStrip;
-        //private System.Windows.Forms.ToolStripMenuItem settingsMenu; // Possibly remove, possible duplicate.
-        private System.Windows.Forms.ToolStripMenuItem helpMenu;
+        private System.Windows.Forms.ToolStripMenuItem fileMenu;
         private System.Windows.Forms.ListBox jobList;
         private System.Windows.Forms.ListBox resultList;
         private System.Windows.Forms.ListBox alertList;
@@ -323,8 +359,6 @@
         private System.Windows.Forms.Button editJobButton;
         private System.Windows.Forms.Button removeJobButton;
         private System.Windows.Forms.Button viewChartButton;
-        private System.Windows.Forms.Button exportSettingsButton;
-        private System.Windows.Forms.Button importSettingsButton;
         private System.Windows.Forms.Button clearAlertsButton;
         private System.Windows.Forms.StatusStrip statusStrip;
         private System.Windows.Forms.ToolStripStatusLabel statusLabel;
@@ -335,6 +369,13 @@
         private System.Windows.Forms.Label curJobPingListHeaderLabel;
         private System.Windows.Forms.Label resultListHeaderLabel;
         private System.Windows.Forms.Label alertListHeaderLabel;
-        
+        private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripMenuItem importJobsToolStripMenuItem;
+        private ToolStripMenuItem exportJobsToolStripMenuItem;
+        private ToolStripMenuItem toolStripMenuItem2;
+        private ToolStripMenuItem importPingHistoryToolStripMenuItem;
+        private ToolStripMenuItem exportPingHistoryToolStripMenuItem;
+        private ToolStripMenuItem toolStripMenuItem3;
+        private ToolStripMenuItem toolStripMenuItem4;
     }
 }

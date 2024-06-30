@@ -1,4 +1,5 @@
-﻿using System.Net.NetworkInformation;
+﻿using PingBuddy;
+using System.Net.NetworkInformation;
 
 public class PingJob
 {
@@ -14,6 +15,7 @@ public class PingJob
     public bool SendEmailOnAlert { get; set; }
     public int TotalPings { get; private set; }
     public int FailedPings { get; private set; }
+    public List<PingResult> PingResults { get; set; } = new List<PingResult>();
 
     public double ApproximatePacketLoss => TotalPings > 0 ? (double)FailedPings / TotalPings * 100 : 0;
 
@@ -34,12 +36,29 @@ public class PingJob
         {
             byte[] buffer = new byte[BufferSize];
             new Random().NextBytes(buffer);
-            TotalPings++;
             var reply = pinger.Send(Host, Timeout, buffer);
+
+            var result = new PingResult
+            {
+                Timestamp = DateTime.Now,
+                Status = reply.Status,
+                Latency = reply.Status == IPStatus.Success ? reply.RoundtripTime : -1
+            };
+
+            // Check for alerts
             if (reply.Status != IPStatus.Success)
             {
-                FailedPings++;
+                result.AlertType = Alert.AlertType.ConnectionLost;
+                result.AlertMessage = $"Connection lost: {reply.Status}";
             }
+            else if (reply.RoundtripTime > LatencyThreshold)
+            {
+                result.AlertType = Alert.AlertType.HighLatency;
+                result.AlertMessage = $"High latency: {reply.RoundtripTime}ms";
+            }
+
+            PingResults.Add(result);
+
             return reply;
         }
     }
