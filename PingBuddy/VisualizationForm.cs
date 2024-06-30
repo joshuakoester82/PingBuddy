@@ -53,6 +53,7 @@ namespace PingBuddy
                 if (latencyCheckBox.Checked)
                 {
                     AddLatencySeries(job);
+                    AddAlertSeries(job);
                 }
 
                 if (packetLossCheckBox.Checked)
@@ -84,6 +85,34 @@ namespace PingBuddy
             }
 
             pingChart.Series.Add(latencySeries);
+        }
+
+        private void AddAlertSeries(PingJob job)
+        {
+            Series alertSeries = new Series(job.Name + " Alerts")
+            {
+                ChartType = SeriesChartType.Point,
+                XValueType = ChartValueType.DateTime,
+                YValueType = ChartValueType.Double,
+                Color = Color.Red,
+                MarkerStyle = MarkerStyle.Circle,
+                MarkerSize = 10
+            };
+
+            var filteredAlerts = job.PingResults
+                .Where(r => r.Timestamp >= startDatePicker.Value && r.Timestamp <= endDatePicker.Value)
+                .Where(r => r.AlertType.HasValue);
+
+            foreach (var alert in filteredAlerts)
+            {
+                DataPoint alertPoint = new DataPoint(alert.Timestamp.ToOADate(), alert.Latency)
+                {
+                    ToolTip = $"Alert: {alert.AlertType}\n{alert.AlertMessage}"
+                };
+                alertSeries.Points.Add(alertPoint);
+            }
+
+            pingChart.Series.Add(alertSeries);
         }
 
         private void AddPacketLossSeries(PingJob job)
@@ -148,7 +177,7 @@ namespace PingBuddy
         {
             using (var writer = new System.IO.StreamWriter(fileName))
             {
-                writer.WriteLine("Timestamp,Job Name,Latency,Status");
+                writer.WriteLine("Timestamp,Job Name,Latency,Status,Alert Type,Alert Message");
 
                 foreach (PingJob job in jobListBox.SelectedItems)
                 {
@@ -157,7 +186,7 @@ namespace PingBuddy
 
                     foreach (var result in filteredResults)
                     {
-                        writer.WriteLine($"{result.Timestamp},{job.Name},{result.Latency},{result.Status}");
+                        writer.WriteLine($"{result.Timestamp},{job.Name},{result.Latency},{result.Status},{result.AlertType},{result.AlertMessage}");
                     }
                 }
             }
