@@ -685,11 +685,11 @@ namespace PingBuddy
         }
         private void ScheduleJobButton_Click(object sender, EventArgs e)
         {
-            using (var scheduleForm = new ScheduleJobForm(pingJobs))
+            using (var scheduleForm = new ScheduleJobForm())
             {
                 if (scheduleForm.ShowDialog() == DialogResult.OK)
                 {
-                    scheduledJobs.AddRange(scheduleForm.ScheduledJobs);
+                    //scheduledJobs.AddRange(scheduleForm.ScheduledJobs);
                     UpdateScheduledJobList();
                 }
             }
