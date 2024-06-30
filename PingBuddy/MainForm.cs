@@ -474,6 +474,7 @@ namespace PingBuddy
             exportJobsToolStripMenuItem.Click += ExportJobsToolStripMenuItem_Click;
             importPingHistoryToolStripMenuItem.Click += ImportPingHistoryToolStripMenuItem_Click;
             exportPingHistoryToolStripMenuItem.Click += ExportPingHistoryToolStripMenuItem_Click;
+            networkDetailMenuItem.Click += networkDetailMenuItem_Click;
         }
         private void ImportJobsToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -652,6 +653,11 @@ namespace PingBuddy
                     }
                 }
             }
+        }
+        private void networkDetailMenuItem_Click(object sender, EventArgs e)
+        {
+            NetworkDetailsForm networkDetailsForm = new NetworkDetailsForm();
+            networkDetailsForm.Show(); // This shows the form without closing the main form
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {

@@ -37,6 +37,8 @@
             toolStripMenuItem2 = new ToolStripMenuItem();
             importPingHistoryToolStripMenuItem = new ToolStripMenuItem();
             exportPingHistoryToolStripMenuItem = new ToolStripMenuItem();
+            toolStripMenuItem3 = new ToolStripMenuItem();
+            networkDetailMenuItem = new ToolStripMenuItem();
             jobList = new ListBox();
             resultList = new ListBox();
             alertList = new ListBox();
@@ -55,8 +57,6 @@
             curJobPingListHeaderLabel = new Label();
             resultListHeaderLabel = new Label();
             alertListHeaderLabel = new Label();
-            toolStripMenuItem3 = new ToolStripMenuItem();
-            toolStripMenuItem4 = new ToolStripMenuItem();
             menuStrip.SuspendLayout();
             statusStrip.SuspendLayout();
             SuspendLayout();
@@ -83,7 +83,7 @@
             // 
             toolStripMenuItem1.DropDownItems.AddRange(new ToolStripItem[] { importJobsToolStripMenuItem, exportJobsToolStripMenuItem });
             toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(270, 34);
+            toolStripMenuItem1.Size = new Size(211, 34);
             toolStripMenuItem1.Text = "Jobs";
             toolStripMenuItem1.ToolTipText = "Jobs";
             // 
@@ -103,7 +103,7 @@
             // 
             toolStripMenuItem2.DropDownItems.AddRange(new ToolStripItem[] { importPingHistoryToolStripMenuItem, exportPingHistoryToolStripMenuItem });
             toolStripMenuItem2.Name = "toolStripMenuItem2";
-            toolStripMenuItem2.Size = new Size(270, 34);
+            toolStripMenuItem2.Size = new Size(211, 34);
             toolStripMenuItem2.Text = "Ping History";
             // 
             // importPingHistoryToolStripMenuItem
@@ -117,6 +117,19 @@
             exportPingHistoryToolStripMenuItem.Name = "exportPingHistoryToolStripMenuItem";
             exportPingHistoryToolStripMenuItem.Size = new Size(271, 34);
             exportPingHistoryToolStripMenuItem.Text = "Export Ping History";
+            // 
+            // toolStripMenuItem3
+            // 
+            toolStripMenuItem3.DropDownItems.AddRange(new ToolStripItem[] { networkDetailMenuItem });
+            toolStripMenuItem3.Name = "toolStripMenuItem3";
+            toolStripMenuItem3.Size = new Size(95, 29);
+            toolStripMenuItem3.Text = "Network";
+            // 
+            // networkDetailMenuItem
+            // 
+            networkDetailMenuItem.Name = "networkDetailMenuItem";
+            networkDetailMenuItem.Size = new Size(270, 34);
+            networkDetailMenuItem.Text = "Network Details";
             // 
             // jobList
             // 
@@ -217,23 +230,26 @@
             // 
             // startAllJobsButton
             // 
+            startAllJobsButton.BackColor = SystemColors.Menu;
+            startAllJobsButton.FlatAppearance.BorderSize = 5;
             startAllJobsButton.Image = (Image)resources.GetObject("startAllJobsButton.Image");
-            startAllJobsButton.Location = new Point(1678, 821);
+            startAllJobsButton.Location = new Point(1566, 804);
             startAllJobsButton.Margin = new Padding(5, 6, 5, 6);
             startAllJobsButton.Name = "startAllJobsButton";
-            startAllJobsButton.Size = new Size(200, 113);
+            startAllJobsButton.Size = new Size(245, 148);
             startAllJobsButton.TabIndex = 16;
-            startAllJobsButton.UseVisualStyleBackColor = true;
+            startAllJobsButton.UseVisualStyleBackColor = false;
             // 
             // stopAllJobsButton
             // 
+            stopAllJobsButton.BackColor = SystemColors.Menu;
             stopAllJobsButton.Image = (Image)resources.GetObject("stopAllJobsButton.Image");
-            stopAllJobsButton.Location = new Point(1678, 946);
+            stopAllJobsButton.Location = new Point(1566, 960);
             stopAllJobsButton.Margin = new Padding(5, 6, 5, 6);
             stopAllJobsButton.Name = "stopAllJobsButton";
-            stopAllJobsButton.Size = new Size(200, 113);
+            stopAllJobsButton.Size = new Size(245, 148);
             stopAllJobsButton.TabIndex = 17;
-            stopAllJobsButton.UseVisualStyleBackColor = true;
+            stopAllJobsButton.UseVisualStyleBackColor = false;
             // 
             // clearResultsButton
             // 
@@ -299,19 +315,6 @@
             alertListHeaderLabel.TabIndex = 15;
             alertListHeaderLabel.Text = "Alerts";
             // 
-            // toolStripMenuItem3
-            // 
-            toolStripMenuItem3.DropDownItems.AddRange(new ToolStripItem[] { toolStripMenuItem4 });
-            toolStripMenuItem3.Name = "toolStripMenuItem3";
-            toolStripMenuItem3.Size = new Size(95, 29);
-            toolStripMenuItem3.Text = "Network";
-            // 
-            // toolStripMenuItem4
-            // 
-            toolStripMenuItem4.Name = "toolStripMenuItem4";
-            toolStripMenuItem4.Size = new Size(270, 34);
-            toolStripMenuItem4.Text = "Network Details";
-            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -376,6 +379,6 @@
         private ToolStripMenuItem importPingHistoryToolStripMenuItem;
         private ToolStripMenuItem exportPingHistoryToolStripMenuItem;
         private ToolStripMenuItem toolStripMenuItem3;
-        private ToolStripMenuItem toolStripMenuItem4;
+        private ToolStripMenuItem networkDetailMenuItem;
     }
 }
