@@ -290,6 +290,12 @@ namespace PingBuddy
             startAllJobsButton.Enabled = !isRunning;
             stopAllJobsButton.Enabled = isRunning;
         }
+        private void OpenVisualizationForm()
+        {
+            var visualizationForm = new VisualizationForm();
+            visualizationForm.PopulateJobList(pingJobs);
+            visualizationForm.Show();
+        }
         private void AddJobButton_Click(object sender, EventArgs e)
         {
             using (var addJobForm = new AddEditJobForm())
@@ -356,7 +362,7 @@ namespace PingBuddy
         }
         private void ViewChartButton_Click(object sender, EventArgs e)
         {
-            // TODO: Implement view chart functionality
+            OpenVisualizationForm();
         }
         private void LoadSettings()
         {

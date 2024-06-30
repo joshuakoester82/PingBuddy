@@ -128,7 +128,7 @@
             // networkDetailMenuItem
             // 
             networkDetailMenuItem.Name = "networkDetailMenuItem";
-            networkDetailMenuItem.Size = new Size(270, 34);
+            networkDetailMenuItem.Size = new Size(239, 34);
             networkDetailMenuItem.Text = "Network Details";
             // 
             // jobList
