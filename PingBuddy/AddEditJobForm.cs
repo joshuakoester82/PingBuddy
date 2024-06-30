@@ -19,20 +19,15 @@ namespace PingBuddy
         {
             intervalNumericUpDown.Minimum = 100;
             intervalNumericUpDown.Maximum = 60000;
-
             timeoutNumericUpDown.Minimum = 100;
             timeoutNumericUpDown.Maximum = 60000;
-
             bufferSizeNumericUpDown.Minimum = 1;
             bufferSizeNumericUpDown.Maximum = 65500;
-
             latencyThresholdNumericUpDown.Minimum = 1;
             latencyThresholdNumericUpDown.Maximum = 10000;
-
             packetLossThresholdNumericUpDown.Minimum = 0;
             packetLossThresholdNumericUpDown.Maximum = 100;
             packetLossThresholdNumericUpDown.DecimalPlaces = 2;
-
             consecutiveFailuresNumericUpDown.Minimum = 1;
             consecutiveFailuresNumericUpDown.Maximum = 100;
         }

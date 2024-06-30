@@ -53,6 +53,7 @@
             stopAllJobsButton = new Button();
             clearResultsButton = new Button();
             clearAlertsButton = new Button();
+            scheduleJobButton = new Button();
             jobListHeaderLabel = new Label();
             curJobPingListHeaderLabel = new Label();
             resultListHeaderLabel = new Label();
@@ -315,6 +316,16 @@
             alertListHeaderLabel.TabIndex = 15;
             alertListHeaderLabel.Text = "Alerts";
             // 
+            // scheduleJobButton
+            // 
+            scheduleJobButton.Location = new Point(23, 1030);
+            scheduleJobButton.Margin = new Padding(5, 6, 5, 6);
+            scheduleJobButton.Name = "scheduleJobButton";
+            scheduleJobButton.Size = new Size(167, 58);
+            scheduleJobButton.TabIndex = 20;
+            scheduleJobButton.Text = "Schedule Jobs";
+            scheduleJobButton.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
@@ -338,6 +349,7 @@
             Controls.Add(curJobPingList);
             Controls.Add(jobList);
             Controls.Add(menuStrip);
+            Controls.Add(scheduleJobButton);
             MainMenuStrip = menuStrip;
             Margin = new Padding(5, 6, 5, 6);
             Name = "MainForm";
@@ -380,5 +392,6 @@
         private ToolStripMenuItem exportPingHistoryToolStripMenuItem;
         private ToolStripMenuItem toolStripMenuItem3;
         private ToolStripMenuItem networkDetailMenuItem;
+        private Button scheduleJobButton;
     }
 }

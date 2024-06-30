@@ -72,7 +72,8 @@ namespace PingBuddy
                 ChartType = SeriesChartType.Line,
                 XValueType = ChartValueType.DateTime,
                 YValueType = ChartValueType.Double,
-                Color = GetRandomColor()
+                Color = GetRandomColor(),
+                BorderWidth = 3
             };
 
             var filteredResults = job.PingResults
@@ -123,7 +124,8 @@ namespace PingBuddy
                 XValueType = ChartValueType.DateTime,
                 YValueType = ChartValueType.Double,
                 Color = GetRandomColor(),
-                YAxisType = AxisType.Secondary
+                YAxisType = AxisType.Secondary,
+                BorderWidth = 3
             };
 
             var groupedResults = job.PingResults

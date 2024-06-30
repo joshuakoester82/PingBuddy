@@ -19,6 +19,11 @@ public class PingJob
 
     public double ApproximatePacketLoss => TotalPings > 0 ? (double)FailedPings / TotalPings * 100 : 0;
 
+    // New properties for scheduling
+    public bool IsScheduled { get; set; }
+    public DateTime? ScheduledStartTime { get; set; }
+    public TimeSpan Duration { get; set; }
+
     public PingJob()
     {
         // Default values
@@ -87,6 +92,15 @@ public class PingJob
     {
         TotalPings = 0;
         FailedPings = 0;
+    }
+
+    public bool ShouldBeRunning()
+    {
+        if (!IsScheduled)
+            return true; // Non-scheduled jobs are always running
+
+        var now = DateTime.Now;
+        return now >= ScheduledStartTime && now < ScheduledStartTime.Value.Add(Duration);
     }
 
     public override string ToString()

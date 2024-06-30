@@ -47,102 +47,71 @@
             ((System.ComponentModel.ISupportInitialize)packetLossThresholdNumericUpDown).BeginInit();
             ((System.ComponentModel.ISupportInitialize)consecutiveFailuresNumericUpDown).BeginInit();
             SuspendLayout();
-            // 
+
             // nameTextBox
-            // 
-            nameTextBox.Location = new Point(0, 0);
-            nameTextBox.Name = "nameTextBox";
-            nameTextBox.Size = new Size(100, 31);
-            nameTextBox.TabIndex = 0;
-            // 
+            nameTextBox = CreateTextBox(30, "Name:");
+
             // hostTextBox
-            // 
-            hostTextBox.Location = new Point(0, 0);
-            hostTextBox.Name = "hostTextBox";
-            hostTextBox.Size = new Size(100, 31);
-            hostTextBox.TabIndex = 0;
-            // 
+            hostTextBox = CreateTextBox(70, "Host:");
+
             // intervalNumericUpDown
-            // 
-            intervalNumericUpDown.Location = new Point(0, 0);
-            intervalNumericUpDown.Name = "intervalNumericUpDown";
-            intervalNumericUpDown.Size = new Size(120, 31);
-            intervalNumericUpDown.TabIndex = 0;
-            // 
+            intervalNumericUpDown = CreateNumericUpDown(110, "Interval (ms):");
+
             // timeoutNumericUpDown
-            // 
-            timeoutNumericUpDown.Location = new Point(0, 0);
-            timeoutNumericUpDown.Name = "timeoutNumericUpDown";
-            timeoutNumericUpDown.Size = new Size(120, 31);
-            timeoutNumericUpDown.TabIndex = 0;
-            // 
+            timeoutNumericUpDown = CreateNumericUpDown(150, "Timeout (ms):");
+
             // bufferSizeNumericUpDown
-            // 
-            bufferSizeNumericUpDown.Location = new Point(0, 0);
-            bufferSizeNumericUpDown.Name = "bufferSizeNumericUpDown";
-            bufferSizeNumericUpDown.Size = new Size(120, 31);
-            bufferSizeNumericUpDown.TabIndex = 0;
-            // 
+            bufferSizeNumericUpDown = CreateNumericUpDown(190, "Buffer Size (bytes):");
+
             // latencyThresholdNumericUpDown
-            // 
-            latencyThresholdNumericUpDown.Location = new Point(0, 0);
-            latencyThresholdNumericUpDown.Name = "latencyThresholdNumericUpDown";
-            latencyThresholdNumericUpDown.Size = new Size(120, 31);
-            latencyThresholdNumericUpDown.TabIndex = 0;
-            // 
+            latencyThresholdNumericUpDown = CreateNumericUpDown(230, "Latency Threshold (ms):");
+
             // packetLossThresholdNumericUpDown
-            // 
-            packetLossThresholdNumericUpDown.Location = new Point(0, 0);
-            packetLossThresholdNumericUpDown.Name = "packetLossThresholdNumericUpDown";
-            packetLossThresholdNumericUpDown.Size = new Size(120, 31);
-            packetLossThresholdNumericUpDown.TabIndex = 0;
-            // 
+            packetLossThresholdNumericUpDown = CreateNumericUpDown(270, "Packet Loss Threshold (%):");
+
             // consecutiveFailuresNumericUpDown
-            // 
-            consecutiveFailuresNumericUpDown.Location = new Point(0, 0);
-            consecutiveFailuresNumericUpDown.Name = "consecutiveFailuresNumericUpDown";
-            consecutiveFailuresNumericUpDown.Size = new Size(120, 31);
-            consecutiveFailuresNumericUpDown.TabIndex = 0;
-            // 
+            consecutiveFailuresNumericUpDown = CreateNumericUpDown(310, "Consecutive Failures:");
+
             // playSoundCheckBox
-            // 
-            playSoundCheckBox.Location = new Point(0, 0);
-            playSoundCheckBox.Name = "playSoundCheckBox";
-            playSoundCheckBox.Size = new Size(104, 24);
-            playSoundCheckBox.TabIndex = 0;
-            // 
+            playSoundCheckBox = CreateCheckBox(350, "Play Sound on Alert");
+
             // sendEmailCheckBox
-            // 
-            sendEmailCheckBox.Location = new Point(0, 0);
-            sendEmailCheckBox.Name = "sendEmailCheckBox";
-            sendEmailCheckBox.Size = new Size(104, 24);
-            sendEmailCheckBox.TabIndex = 0;
-            // 
+            sendEmailCheckBox = CreateCheckBox(390, "Send Email on Alert");
+
             // saveButton
-            // 
-            saveButton.Location = new Point(150, 520);
+            saveButton.Location = new Point(150, 440);
             saveButton.Name = "saveButton";
             saveButton.Size = new Size(100, 30);
-            saveButton.TabIndex = 0;
+            saveButton.TabIndex = 10;
             saveButton.Text = "Save";
+            saveButton.UseVisualStyleBackColor = true;
             saveButton.Click += SaveButton_Click;
-            // 
+
             // cancelButton
-            // 
-            cancelButton.Location = new Point(270, 520);
+            cancelButton.Location = new Point(270, 440);
             cancelButton.Name = "cancelButton";
             cancelButton.Size = new Size(100, 30);
-            cancelButton.TabIndex = 1;
+            cancelButton.TabIndex = 11;
             cancelButton.Text = "Cancel";
+            cancelButton.UseVisualStyleBackColor = true;
             cancelButton.Click += CancelButton_Click;
-            // 
+
             // AddEditJobForm
-            // 
             AcceptButton = saveButton;
             CancelButton = cancelButton;
-            ClientSize = new Size(458, 604);
+            ClientSize = new Size(500, 500);
             Controls.Add(saveButton);
             Controls.Add(cancelButton);
+            Controls.Add(nameTextBox);
+            Controls.Add(hostTextBox);
+            Controls.Add(intervalNumericUpDown);
+            Controls.Add(timeoutNumericUpDown);
+            Controls.Add(bufferSizeNumericUpDown);
+            Controls.Add(latencyThresholdNumericUpDown);
+            Controls.Add(packetLossThresholdNumericUpDown);
+            Controls.Add(consecutiveFailuresNumericUpDown);
+            Controls.Add(playSoundCheckBox);
+            Controls.Add(sendEmailCheckBox);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -156,6 +125,7 @@
             ((System.ComponentModel.ISupportInitialize)packetLossThresholdNumericUpDown).EndInit();
             ((System.ComponentModel.ISupportInitialize)consecutiveFailuresNumericUpDown).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         private System.Windows.Forms.TextBox CreateTextBox(int y, string labelText)

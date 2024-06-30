@@ -18,6 +18,7 @@ namespace PingBuddy
     public partial class MainForm : Form
     {
         private List<PingJob> pingJobs = new List<PingJob>();
+        private List<PingJob> scheduledJobs = new List<PingJob>(); 
         private BackgroundWorker pingWorker;
         private bool isRunning = false;
         private List<Alert> alertLog = new List<Alert>();
@@ -43,6 +44,7 @@ namespace PingBuddy
             stopAllJobsButton.Click += StopAllJobsButton_Click;
             clearResultsButton.Click += ClearResultsButton_Click;
             clearAlertsButton.Click += ClearAlertsButton_Click;
+            scheduleJobButton.Click += ScheduleJobButton_Click;
 
             jobList.DisplayMember = "Name";
             jobList.ValueMember = "Host";
@@ -113,13 +115,14 @@ namespace PingBuddy
         {
             while (!pingWorker.CancellationPending)
             {
-                List<PingJob> jobsCopy;
+                List<PingJob> allJobs;
                 lock (pingJobs)
                 {
-                    jobsCopy = new List<PingJob>(pingJobs);
+                    allJobs = new List<PingJob>(pingJobs);
+                    allJobs.AddRange(scheduledJobs.Where(j => j.ShouldBeRunning()));
                 }
 
-                foreach (var job in jobsCopy)
+                foreach (var job in allJobs)
                 {
                     if (pingWorker.CancellationPending) break;
 
@@ -130,6 +133,21 @@ namespace PingBuddy
                     });
 
                     System.Threading.Thread.Sleep(job.Interval);
+                }
+
+                // Check for completed scheduled jobs
+                var completedJobs = scheduledJobs.Where(j => DateTime.Now >= j.ScheduledStartTime.Value.Add(j.Duration)).ToList();
+                foreach (var job in completedJobs)
+                {
+                    ExportJobResults(job);
+                    scheduledJobs.Remove(job);
+                }
+                if (completedJobs.Any())
+                {
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        UpdateScheduledJobList();
+                    });
                 }
             }
         }
@@ -664,6 +682,39 @@ namespace PingBuddy
         {
             NetworkDetailsForm networkDetailsForm = new NetworkDetailsForm();
             networkDetailsForm.Show(); // This shows the form without closing the main form
+        }
+        private void ScheduleJobButton_Click(object sender, EventArgs e)
+        {
+            using (var scheduleForm = new ScheduleJobForm(pingJobs))
+            {
+                if (scheduleForm.ShowDialog() == DialogResult.OK)
+                {
+                    scheduledJobs.AddRange(scheduleForm.ScheduledJobs);
+                    UpdateScheduledJobList();
+                }
+            }
+        }
+        private void UpdateScheduledJobList()
+        {
+            var scheduledJobList = (ListBox)Controls.Find("scheduledJobList", true).FirstOrDefault();
+            if (scheduledJobList != null)
+            {
+                scheduledJobList.Items.Clear();
+                scheduledJobList.Items.AddRange(scheduledJobs.Select(j => $"{j.Name} - {j.ScheduledStartTime:g} ({j.Duration.TotalMinutes} min)").ToArray());
+            }
+        }
+        private void ExportJobResults(PingJob job)
+        {
+            string fileName = $"{job.Name}_{job.ScheduledStartTime:yyyyMMdd_HHmmss}.csv";
+            string filePath = Path.Combine(Application.StartupPath, "ScheduledJobResults", fileName);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            using (var writer = new StreamWriter(filePath))
+            using (var csv = new CsvHelper.CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture))
+            {
+                csv.WriteRecords(job.PingResults);
+            }
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
