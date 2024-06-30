@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 namespace PingBuddy
@@ -14,105 +13,6 @@ namespace PingBuddy
             Job = job ?? new PingJob();
             SetupNumericUpDownControls();
             LoadJobData();
-        }
-
-        private void InitializeComponent()
-        {
-            this.Text = "Add/Edit Ping Job";
-            this.Size = new Size(500, 620);
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.StartPosition = FormStartPosition.CenterParent;
-
-            // Create controls
-            nameTextBox = CreateTextBox(30, "Name:");
-            hostTextBox = CreateTextBox(70, "Host:");
-            intervalNumericUpDown = CreateNumericUpDown(110, "Interval (ms):");
-            timeoutNumericUpDown = CreateNumericUpDown(150, "Timeout (ms):");
-            bufferSizeNumericUpDown = CreateNumericUpDown(190, "Buffer Size (bytes):");
-            latencyThresholdNumericUpDown = CreateNumericUpDown(230, "Latency Threshold (ms):");
-            packetLossThresholdNumericUpDown = CreateNumericUpDown(270, "Packet Loss Threshold (%):");
-            consecutiveFailuresNumericUpDown = CreateNumericUpDown(310, "Consecutive Failures:");
-
-            playSoundCheckBox = CreateCheckBox(350, "Play Sound on Alert");
-            sendEmailCheckBox = CreateCheckBox(390, "Send Email on Alert");
-
-            saveButton = new Button
-            {
-                Text = "Save",
-                Location = new Point(150, 520),
-                Size = new Size(100, 30)
-            };
-            saveButton.Click += SaveButton_Click;
-            this.Controls.Add(saveButton);
-
-            cancelButton = new Button
-            {
-                Text = "Cancel",
-                Location = new Point(270, 520),
-                Size = new Size(100, 30)
-            };
-            cancelButton.Click += CancelButton_Click;
-            this.Controls.Add(cancelButton);
-
-            this.AcceptButton = saveButton;
-            this.CancelButton = cancelButton;
-        }
-
-        private TextBox CreateTextBox(int y, string labelText)
-        {
-            var label = new Label
-            {
-                Text = labelText,
-                Location = new Point(30, y),
-                Size = new Size(150, 20),
-                TextAlign = ContentAlignment.MiddleLeft
-            };
-            this.Controls.Add(label);
-
-            var textBox = new TextBox
-            {
-                Location = new Point(200, y),
-                Size = new Size(250, 20)
-            };
-            this.Controls.Add(textBox);
-
-            return textBox;
-        }
-
-        private NumericUpDown CreateNumericUpDown(int y, string labelText)
-        {
-            var label = new Label
-            {
-                Text = labelText,
-                Location = new Point(30, y),
-                Size = new Size(150, 20),
-                TextAlign = ContentAlignment.MiddleLeft
-            };
-            this.Controls.Add(label);
-
-            var numericUpDown = new NumericUpDown
-            {
-                Location = new Point(200, y),
-                Size = new Size(250, 20)
-            };
-            this.Controls.Add(numericUpDown);
-
-            return numericUpDown;
-        }
-
-        private CheckBox CreateCheckBox(int y, string text)
-        {
-            var checkBox = new CheckBox
-            {
-                Text = text,
-                Location = new Point(30, y),
-                Size = new Size(400, 24)
-            };
-            this.Controls.Add(checkBox);
-
-            return checkBox;
         }
 
         private void SetupNumericUpDownControls()
@@ -179,19 +79,5 @@ namespace PingBuddy
             DialogResult = DialogResult.Cancel;
             Close();
         }
-
-        // Declare controls
-        private TextBox nameTextBox;
-        private TextBox hostTextBox;
-        private NumericUpDown intervalNumericUpDown;
-        private NumericUpDown timeoutNumericUpDown;
-        private NumericUpDown bufferSizeNumericUpDown;
-        private NumericUpDown latencyThresholdNumericUpDown;
-        private NumericUpDown packetLossThresholdNumericUpDown;
-        private NumericUpDown consecutiveFailuresNumericUpDown;
-        private CheckBox playSoundCheckBox;
-        private CheckBox sendEmailCheckBox;
-        private Button saveButton;
-        private Button cancelButton;
     }
 }
