@@ -16,13 +16,11 @@ public class PingJob
     public int TotalPings { get; private set; }
     public int FailedPings { get; private set; }
     public List<PingResult> PingResults { get; set; } = new List<PingResult>();
-
     public double ApproximatePacketLoss => TotalPings > 0 ? (double)FailedPings / TotalPings * 100 : 0;
-
-    // New properties for scheduling
     public bool IsScheduled { get; set; }
     public DateTime? ScheduledStartTime { get; set; }
     public TimeSpan Duration { get; set; }
+    private int ConsecutiveFailureCount = 0;
 
     public PingJob()
     {
@@ -50,40 +48,58 @@ public class PingJob
                     Status = reply.Status,
                     Latency = reply.Status == IPStatus.Success ? reply.RoundtripTime : -1
                 };
+                TotalPings++;
+
                 // Check for alerts
                 if (reply.Status != IPStatus.Success)
                 {
+                    FailedPings++;
+                    ConsecutiveFailureCount++;
                     result.AlertType = Alert.AlertType.ConnectionLost;
                     result.AlertMessage = $"Connection lost: {reply.Status}";
+                    if (ConsecutiveFailureCount >= ConsecutiveFailures)
+                    {
+                        result.AlertType = Alert.AlertType.ConnectionLost;
+                        result.AlertMessage = $"Connection lost for {ConsecutiveFailureCount} consecutive pings";
+                    }
                 }
-                else if (reply.RoundtripTime > LatencyThreshold)
+                else
                 {
-                    result.AlertType = Alert.AlertType.HighLatency;
-                    result.AlertMessage = $"High latency: {reply.RoundtripTime}ms";
+                    ConsecutiveFailureCount = 0;
+                    if (reply.RoundtripTime > LatencyThreshold)
+                    {
+                        result.AlertType = Alert.AlertType.HighLatency;
+                        result.AlertMessage = $"High latency: {reply.RoundtripTime}ms";
+                    }
                 }
+
+                // Check for packet loss threshold
+                if (ApproximatePacketLoss > PacketLossThreshold)
+                {
+                    result.AlertType = Alert.AlertType.PacketLoss;
+                    result.AlertMessage = $"Packet loss threshold exceeded: {ApproximatePacketLoss:F2}%";
+                }
+
                 PingResults.Add(result);
-                return reply;
+
+                return reply; // Return the PingReply object
             }
             catch (Exception e)
             {
                 Console.WriteLine($"Error pinging {Host}: {e.Message}");
-
-                // Create and add an error PingResult
                 var errorResult = new PingResult
                 {
                     Timestamp = DateTime.Now,
                     Status = IPStatus.Unknown,
                     Latency = -1,
-                    AlertType = Alert.AlertType.ConnectionLost,  // Using existing AlertType
+                    AlertType = Alert.AlertType.NetworkError,
                     AlertMessage = $"Error: {e.Message}"
                 };
                 PingResults.Add(errorResult);
-
-                // Optionally show a message box (consider removing this in production)
-                MessageBox.Show($"Error pinging {Host}: {e.Message} Is the host invalid?", "Ping Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                // Return a default PingReply object
-                return null;
+                TotalPings++;
+                FailedPings++;
+                ConsecutiveFailureCount++;
+                return null; // Return null in case of an exception
             }
         }
     }
@@ -92,6 +108,7 @@ public class PingJob
     {
         TotalPings = 0;
         FailedPings = 0;
+        ConsecutiveFailures = 0;
     }
 
     public bool ShouldBeRunning()
