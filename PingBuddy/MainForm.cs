@@ -32,6 +32,8 @@ namespace PingBuddy
             SetupCustomControls();
             SetupPingWorker();
             LoadSettings();
+            UpdateAlertList();
+            UpdateResultList();
             WireUpMenuItems();
         }
         private void SetupCustomControls()
@@ -477,11 +479,18 @@ namespace PingBuddy
 
             // Load ping jobs from settings
             pingJobs = appSettings.PingJobs ?? new List<PingJob>();
+
+            // Load alert history from settings
+            alertLog = appSettings.AlertHistory ?? new List<Alert>();
+
             UpdateJobList();
+            UpdateAlertList();
+            UpdateFilteredLists();
         }
         private void SaveSettings()
         {
             appSettings.PingJobs = pingJobs;
+            appSettings.AlertHistory = alertLog;
             string jsonString = JsonSerializer.Serialize(appSettings, new JsonSerializerOptions { WriteIndented = true });
             string settingsPath = Path.Combine(Application.StartupPath, "settings.json");
             File.WriteAllText(settingsPath, jsonString);

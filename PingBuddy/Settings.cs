@@ -1,6 +1,7 @@
 ﻿public class Settings
 {
     public List<PingJob> PingJobs { get; set; }
+    public List<Alert> AlertHistory { get; set; }
     public string EmailSmtpServer { get; set; }
     public int EmailSmtpPort { get; set; }
     public string EmailUsername { get; set; }
