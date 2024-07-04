@@ -66,6 +66,13 @@ namespace PingBuddy
             ToolStripMenuItem settingsMenuItem = new ToolStripMenuItem("Settings");
             settingsMenuItem.Click += SettingsMenuItem_Click;
             menuStrip.Items.Add(settingsMenuItem);
+
+            // jobFilterComboBox
+            jobFilterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            jobFilterComboBox.Items.Add("All");
+            jobFilterComboBox.SelectedIndex = 0; // Default to "All"
+            jobFilterComboBox.SelectedIndexChanged += JobFilterComboBox_SelectedIndexChanged;
+            UpdateJobFilterComboBox();
         }
         private void SettingsMenuItem_Click(object sender, EventArgs e)
         {
@@ -193,6 +200,7 @@ namespace PingBuddy
             StoreHistoricalData(job.Name, reply);
 
             curJobPingList.Refresh(); // Force redraw to update colors
+            UpdateFilteredLists(); // Update the filter dropdown
         }
         private void UpdateCurJobPingList(string jobName, string result)
         {
@@ -235,6 +243,7 @@ namespace PingBuddy
             {
                 SendEmailAlert(alert);
             }
+            UpdateFilteredLists(); // Update the list when a new alert is generated.
         }
         private void UpdateResultList()
         {
@@ -246,6 +255,7 @@ namespace PingBuddy
                     resultList.Items.Add($"{result.Timestamp} - {job.Name}: {result.Status} - {result.Latency}ms");
                 }
             }
+            UpdateJobFilterComboBox();
         }
         private void UpdateAlertList()
         {
@@ -257,6 +267,7 @@ namespace PingBuddy
                     alertList.Items.Add($"{result.Timestamp} - {job.Name}: {result.AlertType} - {result.AlertMessage}");
                 }
             }
+            UpdateJobFilterComboBox();
         }
         private void StoreHistoricalData(string jobName, PingReply? reply)
         {
@@ -377,6 +388,16 @@ namespace PingBuddy
             jobList.DataSource = new BindingList<PingJob>(pingJobs);
             jobList.DisplayMember = "Name";
             jobList.ValueMember = "Host";
+            UpdateJobFilterComboBox();
+        }
+        private void UpdateJobFilterComboBox()
+        {
+            jobFilterComboBox.Items.Clear();
+            jobFilterComboBox.Items.Add("All");
+            foreach (var job in pingJobs)
+            {
+                jobFilterComboBox.Items.Add(job.Name);
+            }
         }
         private void ViewChartButton_Click(object sender, EventArgs e)
         {
@@ -714,6 +735,37 @@ namespace PingBuddy
             using (var csv = new CsvHelper.CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture))
             {
                 csv.WriteRecords(job.PingResults);
+            }
+        }
+        private void JobFilterComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateFilteredLists();
+        }
+        private void UpdateFilteredLists()
+        {
+            string selectedFilter = jobFilterComboBox.SelectedItem?.ToString() ?? "All";
+
+            // Clear and repopulate resultList
+            resultList.Items.Clear();
+            foreach (var job in pingJobs)
+            {
+                if (selectedFilter == "All" || selectedFilter == job.Name)
+                {
+                    foreach (var result in job.PingResults.OrderByDescending(r => r.Timestamp).Take(100))
+                    {
+                        resultList.Items.Add($"{result.Timestamp} - {job.Name}: {result.Status} - {result.Latency}ms");
+                    }
+                }
+            }
+
+            // Clear and repopulate alertList
+            alertList.Items.Clear();
+            foreach (var alert in alertLog)
+            {
+                if (selectedFilter == "All" || selectedFilter == alert.JobName)
+                {
+                    alertList.Items.Add(alert.ToString());
+                }
             }
         }
         protected override void OnFormClosing(FormClosingEventArgs e)
