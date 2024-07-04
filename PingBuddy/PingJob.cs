@@ -120,6 +120,19 @@ public class PingJob
         return now >= ScheduledStartTime && now < ScheduledStartTime.Value.Add(Duration);
     }
 
+    public void ClearResults()
+    {
+        PingResults.Clear();
+    }
+
+    public void ClearAlerts()
+    {
+        foreach (var result in PingResults)
+        {
+            result.AlertType = null;
+        }    
+    }
+
     public override string ToString()
     {
         return Name;

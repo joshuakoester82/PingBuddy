@@ -175,7 +175,7 @@
             // 
             // addJobButton
             // 
-            addJobButton.Location = new Point(23, 821);
+            addJobButton.Location = new Point(23, 820);
             addJobButton.Margin = new Padding(5, 6, 5, 6);
             addJobButton.Name = "addJobButton";
             addJobButton.Size = new Size(167, 58);
@@ -205,7 +205,7 @@
             // 
             // viewChartButton
             // 
-            viewChartButton.Location = new Point(233, 960);
+            viewChartButton.Location = new Point(227, 964);
             viewChartButton.Margin = new Padding(5, 6, 5, 6);
             viewChartButton.Name = "viewChartButton";
             viewChartButton.Size = new Size(200, 58);
@@ -235,7 +235,7 @@
             startAllJobsButton.BackColor = SystemColors.Menu;
             startAllJobsButton.FlatAppearance.BorderSize = 5;
             startAllJobsButton.Image = (Image)resources.GetObject("startAllJobsButton.Image");
-            startAllJobsButton.Location = new Point(1566, 804);
+            startAllJobsButton.Location = new Point(1335, 960);
             startAllJobsButton.Margin = new Padding(5, 6, 5, 6);
             startAllJobsButton.Name = "startAllJobsButton";
             startAllJobsButton.Size = new Size(245, 148);
@@ -255,7 +255,7 @@
             // 
             // clearResultsButton
             // 
-            clearResultsButton.Location = new Point(233, 821);
+            clearResultsButton.Location = new Point(227, 820);
             clearResultsButton.Margin = new Padding(5, 6, 5, 6);
             clearResultsButton.Name = "clearResultsButton";
             clearResultsButton.Size = new Size(200, 58);
@@ -265,7 +265,7 @@
             // 
             // clearAlertsButton
             // 
-            clearAlertsButton.Location = new Point(233, 890);
+            clearAlertsButton.Location = new Point(227, 894);
             clearAlertsButton.Margin = new Padding(5, 6, 5, 6);
             clearAlertsButton.Name = "clearAlertsButton";
             clearAlertsButton.Size = new Size(200, 58);
@@ -331,10 +331,11 @@
             // 
             jobFilterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             jobFilterComboBox.FormattingEnabled = true;
-            jobFilterComboBox.Location = new Point(451, 821);
+            jobFilterComboBox.Location = new Point(1611, 46);
             jobFilterComboBox.Name = "jobFilterComboBox";
             jobFilterComboBox.Size = new Size(200, 33);
             jobFilterComboBox.TabIndex = 21;
+            jobFilterComboBox.SelectedIndexChanged += jobFilterComboBox_SelectedIndexChanged_1;
             // 
             // MainForm
             // 

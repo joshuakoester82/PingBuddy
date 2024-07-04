@@ -18,7 +18,7 @@ namespace PingBuddy
     public partial class MainForm : Form
     {
         private List<PingJob> pingJobs = new List<PingJob>();
-        private List<PingJob> scheduledJobs = new List<PingJob>(); 
+        private List<PingJob> scheduledJobs = new List<PingJob>();
         private BackgroundWorker pingWorker;
         private bool isRunning = false;
         private List<Alert> alertLog = new List<Alert>();
@@ -376,11 +376,19 @@ namespace PingBuddy
         private void ClearResultsButton_Click(object sender, EventArgs e)
         {
             resultList.Items.Clear();
+            foreach (var job in pingJobs)
+            {
+                job.ClearResults();
+            }
         }
         private void ClearAlertsButton_Click(object sender, EventArgs e)
         {
             alertList.Items.Clear();
             alertLog.Clear();
+            foreach (var job in pingJobs)
+            {
+                job.ClearAlerts();
+            }
         }
         private void UpdateJobList()
         {
@@ -434,7 +442,7 @@ namespace PingBuddy
                 if (settingsForm.ShowDialog() == DialogResult.OK)
                 {
                     appSettings = settingsForm.Settings;
-                    SaveSettings(); 
+                    SaveSettings();
                 }
             }
         }
@@ -777,6 +785,11 @@ namespace PingBuddy
             }
             SaveSettings();
             base.OnFormClosing(e);
+        }
+
+        private void jobFilterComboBox_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
         }
     }
 }
