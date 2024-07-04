@@ -18,7 +18,7 @@ namespace PingBuddy
     public partial class MainForm : Form
     {
         private List<PingJob> pingJobs = new List<PingJob>();
-        private List<PingJob> scheduledJobs = new List<PingJob>(); 
+        private List<PingJob> scheduledJobs = new List<PingJob>();
         private BackgroundWorker pingWorker;
         private bool isRunning = false;
         private List<Alert> alertLog = new List<Alert>();
@@ -32,6 +32,8 @@ namespace PingBuddy
             SetupCustomControls();
             SetupPingWorker();
             LoadSettings();
+            UpdateAlertList();
+            UpdateResultList();
             WireUpMenuItems();
         }
         private void SetupCustomControls()
@@ -66,6 +68,13 @@ namespace PingBuddy
             ToolStripMenuItem settingsMenuItem = new ToolStripMenuItem("Settings");
             settingsMenuItem.Click += SettingsMenuItem_Click;
             menuStrip.Items.Add(settingsMenuItem);
+
+            // jobFilterComboBox
+            jobFilterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            jobFilterComboBox.Items.Add("All");
+            jobFilterComboBox.SelectedIndex = 0; // Default to "All"
+            jobFilterComboBox.SelectedIndexChanged += JobFilterComboBox_SelectedIndexChanged;
+            UpdateJobFilterComboBox();
         }
         private void SettingsMenuItem_Click(object sender, EventArgs e)
         {
@@ -193,6 +202,7 @@ namespace PingBuddy
             StoreHistoricalData(job.Name, reply);
 
             curJobPingList.Refresh(); // Force redraw to update colors
+            UpdateFilteredLists(); // Update the filter dropdown
         }
         private void UpdateCurJobPingList(string jobName, string result)
         {
@@ -235,6 +245,7 @@ namespace PingBuddy
             {
                 SendEmailAlert(alert);
             }
+            UpdateFilteredLists(); // Update the list when a new alert is generated.
         }
         private void UpdateResultList()
         {
@@ -246,6 +257,7 @@ namespace PingBuddy
                     resultList.Items.Add($"{result.Timestamp} - {job.Name}: {result.Status} - {result.Latency}ms");
                 }
             }
+            UpdateJobFilterComboBox();
         }
         private void UpdateAlertList()
         {
@@ -257,6 +269,7 @@ namespace PingBuddy
                     alertList.Items.Add($"{result.Timestamp} - {job.Name}: {result.AlertType} - {result.AlertMessage}");
                 }
             }
+            UpdateJobFilterComboBox();
         }
         private void StoreHistoricalData(string jobName, PingReply? reply)
         {
@@ -364,12 +377,71 @@ namespace PingBuddy
         }
         private void ClearResultsButton_Click(object sender, EventArgs e)
         {
-            resultList.Items.Clear();
+            string selectedFilter = jobFilterComboBox.SelectedItem?.ToString() ?? "All";
+
+            if (selectedFilter == "All")
+            {
+                resultList.Items.Clear();
+                foreach (var job in pingJobs)
+                {
+                    job.ClearResults();
+                }
+            }
+            else
+            {
+                var selectedJob = pingJobs.FirstOrDefault(job => job.Name == selectedFilter);
+                if (selectedJob != null)
+                {
+                    selectedJob.ClearResults();
+
+                    // Remove only the results for the selected job from the resultList
+                    for (int i = resultList.Items.Count - 1; i >= 0; i--)
+                    {
+                        if (resultList.Items[i].ToString().Contains(selectedJob.Name))
+                        {
+                            resultList.Items.RemoveAt(i);
+                        }
+                    }
+                }
+            }
+
+            UpdateFilteredLists();
         }
         private void ClearAlertsButton_Click(object sender, EventArgs e)
         {
-            alertList.Items.Clear();
-            alertLog.Clear();
+            string selectedFilter = jobFilterComboBox.SelectedItem?.ToString() ?? "All";
+
+            if (selectedFilter == "All")
+            {
+                alertList.Items.Clear();
+                alertLog.Clear();
+                foreach (var job in pingJobs)
+                {
+                    job.ClearAlerts();
+                }
+            }
+            else
+            {
+                var selectedJob = pingJobs.FirstOrDefault(job => job.Name == selectedFilter);
+                if (selectedJob != null)
+                {
+                    selectedJob.ClearAlerts();
+
+                    // Remove only the alerts for the selected job from the alertLog
+                    alertLog.RemoveAll(alert => alert.JobName == selectedJob.Name);
+
+                    // Remove only the alerts for the selected job from the alertList
+                    for (int i = alertList.Items.Count - 1; i >= 0; i--)
+                    {
+                        if (alertList.Items[i].ToString().Contains(selectedJob.Name))
+                        {
+                            alertList.Items.RemoveAt(i);
+                        }
+                    }
+                }
+            }
+
+            UpdateFilteredLists();
         }
         private void UpdateJobList()
         {
@@ -377,6 +449,16 @@ namespace PingBuddy
             jobList.DataSource = new BindingList<PingJob>(pingJobs);
             jobList.DisplayMember = "Name";
             jobList.ValueMember = "Host";
+            UpdateJobFilterComboBox();
+        }
+        private void UpdateJobFilterComboBox()
+        {
+            jobFilterComboBox.Items.Clear();
+            jobFilterComboBox.Items.Add("All");
+            foreach (var job in pingJobs)
+            {
+                jobFilterComboBox.Items.Add(job.Name);
+            }
         }
         private void ViewChartButton_Click(object sender, EventArgs e)
         {
@@ -397,11 +479,18 @@ namespace PingBuddy
 
             // Load ping jobs from settings
             pingJobs = appSettings.PingJobs ?? new List<PingJob>();
+
+            // Load alert history from settings
+            alertLog = appSettings.AlertHistory ?? new List<Alert>();
+
             UpdateJobList();
+            UpdateAlertList();
+            UpdateFilteredLists();
         }
         private void SaveSettings()
         {
             appSettings.PingJobs = pingJobs;
+            appSettings.AlertHistory = alertLog;
             string jsonString = JsonSerializer.Serialize(appSettings, new JsonSerializerOptions { WriteIndented = true });
             string settingsPath = Path.Combine(Application.StartupPath, "settings.json");
             File.WriteAllText(settingsPath, jsonString);
@@ -413,7 +502,7 @@ namespace PingBuddy
                 if (settingsForm.ShowDialog() == DialogResult.OK)
                 {
                     appSettings = settingsForm.Settings;
-                    SaveSettings(); 
+                    SaveSettings();
                 }
             }
         }
@@ -716,6 +805,37 @@ namespace PingBuddy
                 csv.WriteRecords(job.PingResults);
             }
         }
+        private void JobFilterComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateFilteredLists();
+        }
+        private void UpdateFilteredLists()
+        {
+            string selectedFilter = jobFilterComboBox.SelectedItem?.ToString() ?? "All";
+
+            // Clear and repopulate resultList
+            resultList.Items.Clear();
+            foreach (var job in pingJobs)
+            {
+                if (selectedFilter == "All" || selectedFilter == job.Name)
+                {
+                    foreach (var result in job.PingResults.OrderByDescending(r => r.Timestamp).Take(100))
+                    {
+                        resultList.Items.Add($"{result.Timestamp} - {job.Name}: {result.Status} - {result.Latency}ms");
+                    }
+                }
+            }
+
+            // Clear and repopulate alertList
+            alertList.Items.Clear();
+            foreach (var alert in alertLog)
+            {
+                if (selectedFilter == "All" || selectedFilter == alert.JobName)
+                {
+                    alertList.Items.Add(alert.ToString());
+                }
+            }
+        }
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             if (pingWorker.IsBusy)
@@ -725,6 +845,11 @@ namespace PingBuddy
             }
             SaveSettings();
             base.OnFormClosing(e);
+        }
+
+        private void jobFilterComboBox_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
         }
     }
 }
