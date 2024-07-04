@@ -375,20 +375,71 @@ namespace PingBuddy
         }
         private void ClearResultsButton_Click(object sender, EventArgs e)
         {
-            resultList.Items.Clear();
-            foreach (var job in pingJobs)
+            string selectedFilter = jobFilterComboBox.SelectedItem?.ToString() ?? "All";
+
+            if (selectedFilter == "All")
             {
-                job.ClearResults();
+                resultList.Items.Clear();
+                foreach (var job in pingJobs)
+                {
+                    job.ClearResults();
+                }
             }
+            else
+            {
+                var selectedJob = pingJobs.FirstOrDefault(job => job.Name == selectedFilter);
+                if (selectedJob != null)
+                {
+                    selectedJob.ClearResults();
+
+                    // Remove only the results for the selected job from the resultList
+                    for (int i = resultList.Items.Count - 1; i >= 0; i--)
+                    {
+                        if (resultList.Items[i].ToString().Contains(selectedJob.Name))
+                        {
+                            resultList.Items.RemoveAt(i);
+                        }
+                    }
+                }
+            }
+
+            UpdateFilteredLists();
         }
         private void ClearAlertsButton_Click(object sender, EventArgs e)
         {
-            alertList.Items.Clear();
-            alertLog.Clear();
-            foreach (var job in pingJobs)
+            string selectedFilter = jobFilterComboBox.SelectedItem?.ToString() ?? "All";
+
+            if (selectedFilter == "All")
             {
-                job.ClearAlerts();
+                alertList.Items.Clear();
+                alertLog.Clear();
+                foreach (var job in pingJobs)
+                {
+                    job.ClearAlerts();
+                }
             }
+            else
+            {
+                var selectedJob = pingJobs.FirstOrDefault(job => job.Name == selectedFilter);
+                if (selectedJob != null)
+                {
+                    selectedJob.ClearAlerts();
+
+                    // Remove only the alerts for the selected job from the alertLog
+                    alertLog.RemoveAll(alert => alert.JobName == selectedJob.Name);
+
+                    // Remove only the alerts for the selected job from the alertList
+                    for (int i = alertList.Items.Count - 1; i >= 0; i--)
+                    {
+                        if (alertList.Items[i].ToString().Contains(selectedJob.Name))
+                        {
+                            alertList.Items.RemoveAt(i);
+                        }
+                    }
+                }
+            }
+
+            UpdateFilteredLists();
         }
         private void UpdateJobList()
         {
