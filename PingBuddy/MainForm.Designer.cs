@@ -58,6 +58,7 @@
             curJobPingListHeaderLabel = new Label();
             resultListHeaderLabel = new Label();
             alertListHeaderLabel = new Label();
+            jobFilterComboBox = new ComboBox();
             menuStrip.SuspendLayout();
             statusStrip.SuspendLayout();
             SuspendLayout();
@@ -272,6 +273,16 @@
             clearAlertsButton.Text = "Clear Alerts";
             clearAlertsButton.UseVisualStyleBackColor = true;
             // 
+            // scheduleJobButton
+            // 
+            scheduleJobButton.Location = new Point(23, 1030);
+            scheduleJobButton.Margin = new Padding(5, 6, 5, 6);
+            scheduleJobButton.Name = "scheduleJobButton";
+            scheduleJobButton.Size = new Size(167, 58);
+            scheduleJobButton.TabIndex = 20;
+            scheduleJobButton.Text = "Schedule Jobs";
+            scheduleJobButton.UseVisualStyleBackColor = true;
+            // 
             // jobListHeaderLabel
             // 
             jobListHeaderLabel.AutoSize = true;
@@ -316,21 +327,21 @@
             alertListHeaderLabel.TabIndex = 15;
             alertListHeaderLabel.Text = "Alerts";
             // 
-            // scheduleJobButton
+            // jobFilterComboBox
             // 
-            scheduleJobButton.Location = new Point(23, 1030);
-            scheduleJobButton.Margin = new Padding(5, 6, 5, 6);
-            scheduleJobButton.Name = "scheduleJobButton";
-            scheduleJobButton.Size = new Size(167, 58);
-            scheduleJobButton.TabIndex = 20;
-            scheduleJobButton.Text = "Schedule Jobs";
-            scheduleJobButton.UseVisualStyleBackColor = true;
+            jobFilterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            jobFilterComboBox.FormattingEnabled = true;
+            jobFilterComboBox.Location = new Point(451, 821);
+            jobFilterComboBox.Name = "jobFilterComboBox";
+            jobFilterComboBox.Size = new Size(200, 33);
+            jobFilterComboBox.TabIndex = 21;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1898, 1153);
+            Controls.Add(jobFilterComboBox);
             Controls.Add(clearAlertsButton);
             Controls.Add(clearResultsButton);
             Controls.Add(stopAllJobsButton);
@@ -364,6 +375,7 @@
 
         #endregion
 
+        // Declare all buttons and elements here.
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem fileMenu;
         private System.Windows.Forms.ListBox jobList;
@@ -384,6 +396,7 @@
         private System.Windows.Forms.Label curJobPingListHeaderLabel;
         private System.Windows.Forms.Label resultListHeaderLabel;
         private System.Windows.Forms.Label alertListHeaderLabel;
+        private System.Windows.Forms.ComboBox jobFilterComboBox;
         private ToolStripMenuItem toolStripMenuItem1;
         private ToolStripMenuItem importJobsToolStripMenuItem;
         private ToolStripMenuItem exportJobsToolStripMenuItem;
