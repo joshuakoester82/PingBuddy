@@ -12,4 +12,10 @@
         Duration = duration;
         Status = status;
     }
+
+    public bool ShouldBeRunning()
+    {
+        var now = DateTime.Now;
+        return now >= StartTime && now < StartTime.Add(Duration);
+    }
 }

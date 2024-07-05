@@ -9,16 +9,20 @@ namespace PingBuddy
         private List<PingJob> availableJobs;
         private List<ScheduledJob> scheduledJobs;
 
-        public ScheduleJobForm(List<PingJob> jobs)
+        public ScheduleJobForm(List<PingJob> jobs, List<ScheduledJob> existingScheduledJobs)
         {
             InitializeComponent();
             availableJobs = jobs;
-            scheduledJobs = new List<ScheduledJob>();
-            PopulateAvailableJobs();
+            scheduledJobs = existingScheduledJobs ?? new List<ScheduledJob>();
 
-            // Wire up the Schedule button click event
+            PopulateAvailableJobs();
+            UpdateScheduledJobsListView();
+
+            // Wire up button click events
             scheduleButton.Click += ScheduleButton_Click;
             removeScheduledJobButton.Click += RemoveScheduledJobButton_Click;
+            saveButton.Click += SaveButton_Click;
+            cancelButton.Click += (s, e) => this.DialogResult = DialogResult.Cancel;
         }
 
         private void PopulateAvailableJobs()
@@ -74,6 +78,21 @@ namespace PingBuddy
                 item.Tag = scheduledJob;
                 scheduledJobsListView.Items.Add(item);
             }
+        }
+        private void SaveButton_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(outputFolderTextBox.Text))
+            {
+                MessageBox.Show("Please select an output folder.", "Output Folder Required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Here we're just setting the DialogResult. The actual saving will be done in MainForm.
+            this.DialogResult = DialogResult.OK;
+        }
+        public List<ScheduledJob> GetScheduledJobs()
+        {
+            return scheduledJobs;
         }
     }
 }

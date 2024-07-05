@@ -18,7 +18,7 @@ namespace PingBuddy
     public partial class MainForm : Form
     {
         private List<PingJob> pingJobs = new List<PingJob>();
-        private List<PingJob> scheduledJobs = new List<PingJob>();
+        private List<ScheduledJob> scheduledJobs = new List<ScheduledJob>();
         private BackgroundWorker pingWorker;
         private bool isRunning = false;
         private List<Alert> alertLog = new List<Alert>();
@@ -32,9 +32,50 @@ namespace PingBuddy
             SetupCustomControls();
             SetupPingWorker();
             LoadSettings();
+            LoadScheduledJobs();
             UpdateAlertList();
             UpdateResultList();
             WireUpMenuItems();
+        }
+        private void LoadScheduledJobs()
+        {
+            string scheduledJobsPath = Path.Combine(Application.StartupPath, "scheduledJobs.json");
+            if (File.Exists(scheduledJobsPath))
+            {
+                string jsonString = File.ReadAllText(scheduledJobsPath);
+                var loadedJobs = JsonSerializer.Deserialize<List<ScheduledJobSaveData>>(jsonString);
+
+                scheduledJobs.Clear();
+                foreach (var loadedJob in loadedJobs)
+                {
+                    var matchingPingJob = pingJobs.FirstOrDefault(j => j.Name == loadedJob.JobName);
+                    if (matchingPingJob != null)
+                    {
+                        scheduledJobs.Add(new ScheduledJob(
+                            matchingPingJob,
+                            loadedJob.StartTime,
+                            loadedJob.Duration,
+                            loadedJob.Status
+                        ));
+                    }
+                }
+
+                UpdateScheduledJobList();
+            }
+        }
+        private void SaveScheduledJobs()
+        {
+            var jobsToSave = scheduledJobs.Select(sj => new ScheduledJobSaveData
+            {
+                JobName = sj.Job.Name,
+                StartTime = sj.StartTime,
+                Duration = sj.Duration,
+                Status = sj.Status
+            }).ToList();
+
+            string jsonString = JsonSerializer.Serialize(jobsToSave, new JsonSerializerOptions { WriteIndented = true });
+            string scheduledJobsPath = Path.Combine(Application.StartupPath, "scheduledJobs.json");
+            File.WriteAllText(scheduledJobsPath, jsonString);
         }
         private void SetupCustomControls()
         {
@@ -128,7 +169,7 @@ namespace PingBuddy
                 lock (pingJobs)
                 {
                     allJobs = new List<PingJob>(pingJobs);
-                    allJobs.AddRange(scheduledJobs.Where(j => j.ShouldBeRunning()));
+                    allJobs.AddRange(scheduledJobs.Where(j => j.ShouldBeRunning()).Select(j => j.Job));
                 }
 
                 foreach (var job in allJobs)
@@ -145,10 +186,10 @@ namespace PingBuddy
                 }
 
                 // Check for completed scheduled jobs
-                var completedJobs = scheduledJobs.Where(j => DateTime.Now >= j.ScheduledStartTime.Value.Add(j.Duration)).ToList();
+                var completedJobs = scheduledJobs.Where(j => DateTime.Now >= j.StartTime.Add(j.Duration)).ToList();
                 foreach (var job in completedJobs)
                 {
-                    ExportJobResults(job);
+                    ExportJobResults(job.Job);
                     scheduledJobs.Remove(job);
                 }
                 if (completedJobs.Any())
@@ -774,22 +815,21 @@ namespace PingBuddy
         }
         private void ScheduleJobButton_Click(object sender, EventArgs e)
         {
-            using (var scheduleForm = new ScheduleJobForm(pingJobs))
+            using (var scheduleForm = new ScheduleJobForm(pingJobs, scheduledJobs))
             {
                 if (scheduleForm.ShowDialog() == DialogResult.OK)
                 {
+                    scheduledJobs = scheduleForm.GetScheduledJobs();
+                    SaveScheduledJobs();
                     UpdateScheduledJobList();
                 }
             }
         }
         private void UpdateScheduledJobList()
         {
-            var scheduledJobList = (ListBox)Controls.Find("scheduledJobList", true).FirstOrDefault();
-            if (scheduledJobList != null)
-            {
-                scheduledJobList.Items.Clear();
-                scheduledJobList.Items.AddRange(scheduledJobs.Select(j => $"{j.Name} - {j.ScheduledStartTime:g} ({j.Duration.TotalMinutes} min)").ToArray());
-            }
+            // Update UI to show scheduled jobs (you might want to add a new ListBox for this)
+            // For now, we'll just update the status strip
+            statusLabel.Text = $"Scheduled Jobs: {scheduledJobs.Count}";
         }
         private void ExportJobResults(PingJob job)
         {
