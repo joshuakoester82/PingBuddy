@@ -23,6 +23,7 @@ namespace PingBuddy
             removeScheduledJobButton.Click += RemoveScheduledJobButton_Click;
             saveButton.Click += SaveButton_Click;
             cancelButton.Click += (s, e) => this.DialogResult = DialogResult.Cancel;
+            selectOutputFolderButton.Click += SelectOutputFolderButton_Click;
         }
 
         private void PopulateAvailableJobs()
@@ -36,7 +37,17 @@ namespace PingBuddy
                 availableJobsListView.Items.Add(item);
             }
         }
-
+        private void SelectOutputFolderButton_Click(object sender, EventArgs e)
+        {
+            using (var folderBrowserDialog = new FolderBrowserDialog())
+            {
+                folderBrowserDialog.Description = "Select Output Folder for Scheduled Job Results";
+                if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+                {
+                    outputFolderTextBox.Text = folderBrowserDialog.SelectedPath;
+                }
+            }
+        }
         private void ScheduleButton_Click(object sender, EventArgs e)
         {
             if (availableJobsListView.SelectedItems.Count == 0)
@@ -45,11 +56,23 @@ namespace PingBuddy
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(outputFolderTextBox.Text))
+            {
+                MessageBox.Show("Please select an output folder.", "No Output Folder", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             PingJob selectedJob = (PingJob)availableJobsListView.SelectedItems[0].Tag;
             DateTime startTime = startDateTimePicker.Value;
             TimeSpan duration = TimeSpan.FromMinutes((double)durationNumericUpDown.Value);
 
-            ScheduledJob newScheduledJob = new ScheduledJob(selectedJob, startTime, duration, "Pending");
+            ScheduledJob newScheduledJob = new ScheduledJob(
+                selectedJob,
+                startTime,
+                duration,
+                "Pending",
+                outputFolderTextBox.Text
+            );
 
             scheduledJobs.Add(newScheduledJob);
             UpdateScheduledJobsListView();
@@ -75,6 +98,7 @@ namespace PingBuddy
                 item.SubItems.Add(scheduledJob.StartTime.ToString("g"));
                 item.SubItems.Add(scheduledJob.Duration.TotalMinutes.ToString() + " min");
                 item.SubItems.Add(scheduledJob.Status);
+                item.SubItems.Add(scheduledJob.OutputFolder);
                 item.Tag = scheduledJob;
                 scheduledJobsListView.Items.Add(item);
             }

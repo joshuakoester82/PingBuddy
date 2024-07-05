@@ -4,4 +4,5 @@
     public DateTime StartTime { get; set; }
     public TimeSpan Duration { get; set; }
     public string Status { get; set; }
+    public string OutputFolder { get; set; }
 }

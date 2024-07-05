@@ -55,7 +55,8 @@ namespace PingBuddy
                             matchingPingJob,
                             loadedJob.StartTime,
                             loadedJob.Duration,
-                            loadedJob.Status
+                            loadedJob.Status,
+                            loadedJob.OutputFolder
                         ));
                     }
                 }
@@ -70,12 +71,18 @@ namespace PingBuddy
                 JobName = sj.Job.Name,
                 StartTime = sj.StartTime,
                 Duration = sj.Duration,
-                Status = sj.Status
+                Status = sj.Status,
+                OutputFolder = sj.OutputFolder
             }).ToList();
 
             string jsonString = JsonSerializer.Serialize(jobsToSave, new JsonSerializerOptions { WriteIndented = true });
             string scheduledJobsPath = Path.Combine(Application.StartupPath, "scheduledJobs.json");
             File.WriteAllText(scheduledJobsPath, jsonString);
+        }
+        private void ExportJobResults(PingJob job, string outputFolder)
+        {
+            // Implement the logic to export job results to the specified output folder
+            // This method should be called when a scheduled job completes
         }
         private void SetupCustomControls()
         {
