@@ -5,11 +5,11 @@
     public TimeSpan Duration { get; set; }
     public string Status { get; set; }
 
-    public ScheduledJob(PingJob job, DateTime startTime, TimeSpan duration)
+    public ScheduledJob(PingJob job, DateTime startTime, TimeSpan duration, string status)
     {
         Job = job;
         StartTime = startTime;
         Duration = duration;
-        Status = "Scheduled";
+        Status = status;
     }
 }

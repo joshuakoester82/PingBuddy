@@ -18,6 +18,7 @@ namespace PingBuddy
 
             // Wire up the Schedule button click event
             scheduleButton.Click += ScheduleButton_Click;
+            removeScheduledJobButton.Click += RemoveScheduledJobButton_Click;
         }
 
         private void PopulateAvailableJobs()
@@ -44,18 +45,23 @@ namespace PingBuddy
             DateTime startTime = startDateTimePicker.Value;
             TimeSpan duration = TimeSpan.FromMinutes((double)durationNumericUpDown.Value);
 
-            ScheduledJob newScheduledJob = new ScheduledJob
-            {
-                Job = selectedJob,
-                StartTime = startTime,
-                Duration = duration,
-                Status = "Pending"
-            };
+            ScheduledJob newScheduledJob = new ScheduledJob(selectedJob, startTime, duration, "Pending");
 
             scheduledJobs.Add(newScheduledJob);
             UpdateScheduledJobsListView();
         }
+        private void RemoveScheduledJobButton_Click(object sender, EventArgs e)
+        {
+            if (scheduledJobsListView.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Please select a scheduled job to remove.", "No Job Selected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
+            ScheduledJob selectedJob = (ScheduledJob)scheduledJobsListView.SelectedItems[0].Tag;
+            scheduledJobs.Remove(selectedJob);
+            UpdateScheduledJobsListView();
+        }
         private void UpdateScheduledJobsListView()
         {
             scheduledJobsListView.Items.Clear();
@@ -69,13 +75,5 @@ namespace PingBuddy
                 scheduledJobsListView.Items.Add(item);
             }
         }
-    }
-
-    public class ScheduledJob
-    {
-        public PingJob Job { get; set; }
-        public DateTime StartTime { get; set; }
-        public TimeSpan Duration { get; set; }
-        public string Status { get; set; }
     }
 }
