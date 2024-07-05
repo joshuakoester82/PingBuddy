@@ -12,6 +12,7 @@
     public string SoundAlertFilePath { get; set; }
     public bool UseSoundAlert { get; set; }
     public int EmailMinuteLimit { get; set; } 
+    public string ScheduledJobOutputFolder { get; set; }
 
     public Settings()
     {

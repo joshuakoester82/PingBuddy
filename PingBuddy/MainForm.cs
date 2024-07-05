@@ -55,8 +55,7 @@ namespace PingBuddy
                             matchingPingJob,
                             loadedJob.StartTime,
                             loadedJob.Duration,
-                            loadedJob.Status,
-                            loadedJob.OutputFolder
+                            loadedJob.Status
                         ));
                     }
                 }
@@ -72,7 +71,6 @@ namespace PingBuddy
                 StartTime = sj.StartTime,
                 Duration = sj.Duration,
                 Status = sj.Status,
-                OutputFolder = sj.OutputFolder
             }).ToList();
 
             string jsonString = JsonSerializer.Serialize(jobsToSave, new JsonSerializerOptions { WriteIndented = true });
@@ -522,7 +520,10 @@ namespace PingBuddy
             }
             else
             {
-                appSettings = new Settings();
+                appSettings = new Settings
+                {
+                    ScheduledJobOutputFolder = Path.Combine(Application.StartupPath, "ScheduledJobResults")
+                };
             }
 
             // Load ping jobs from settings
@@ -822,12 +823,13 @@ namespace PingBuddy
         }
         private void ScheduleJobButton_Click(object sender, EventArgs e)
         {
-            using (var scheduleForm = new ScheduleJobForm(pingJobs, scheduledJobs))
+            using (var scheduleForm = new ScheduleJobForm(pingJobs, scheduledJobs, appSettings.ScheduledJobOutputFolder))
             {
                 if (scheduleForm.ShowDialog() == DialogResult.OK)
                 {
                     scheduledJobs = scheduleForm.GetScheduledJobs();
-                    SaveScheduledJobs();
+                    appSettings.ScheduledJobOutputFolder = scheduleForm.GetOutputFolder();
+                    SaveSettings();
                     UpdateScheduledJobList();
                 }
             }
