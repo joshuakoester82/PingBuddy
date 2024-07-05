@@ -14,7 +14,7 @@ namespace PingBuddy
         {
             InitializeComponent();
             availableJobs = jobs;
-            scheduledJobs = existingScheduledJobs ?? new List<ScheduledJob>();
+            scheduledJobs = new List<ScheduledJob>(existingScheduledJobs ?? new List<ScheduledJob>());
             outputFolder = currentOutputFolder;
 
             PopulateAvailableJobs();
@@ -40,6 +40,29 @@ namespace PingBuddy
                 availableJobsListView.Items.Add(item);
             }
         }
+        public void UpdateJobStatus(ScheduledJob job)
+        {
+            if (IsHandleCreated)
+            {
+                BeginInvoke(new Action(() => UpdateJobStatusInternal(job)));
+            }
+            else
+            {
+                HandleCreated += (sender, args) => UpdateJobStatusInternal(job);
+            }
+        }
+        private void UpdateJobStatusInternal(ScheduledJob job)
+        {
+            foreach (ListViewItem item in scheduledJobsListView.Items)
+            {
+                if (item.Tag is ScheduledJob scheduledJob && scheduledJob == job)
+                {
+                    item.SubItems[3].Text = job.Status;
+                    break;
+                }
+            }
+        }
+
         private void SelectOutputFolderButton_Click(object sender, EventArgs e)
         {
             using (var folderBrowserDialog = new FolderBrowserDialog())
@@ -64,12 +87,7 @@ namespace PingBuddy
             DateTime startTime = startDateTimePicker.Value;
             TimeSpan duration = TimeSpan.FromMinutes((double)durationNumericUpDown.Value);
 
-            ScheduledJob newScheduledJob = new ScheduledJob(
-                selectedJob,
-                startTime,
-                duration
-            );
-
+            ScheduledJob newScheduledJob = new ScheduledJob(selectedJob, startTime, duration);
             scheduledJobs.Add(newScheduledJob);
             UpdateScheduledJobsListView();
         }
@@ -90,13 +108,17 @@ namespace PingBuddy
             scheduledJobsListView.Items.Clear();
             foreach (var scheduledJob in scheduledJobs)
             {
-                ListViewItem item = new ListViewItem(scheduledJob.Job.Name);
-                item.SubItems.Add(scheduledJob.StartTime.ToString("g"));
-                item.SubItems.Add(scheduledJob.Duration.TotalMinutes.ToString() + " min");
-                item.SubItems.Add(scheduledJob.Status);
-                item.Tag = scheduledJob;
-                scheduledJobsListView.Items.Add(item);
+                AddScheduledJobToListView(scheduledJob);
             }
+        }
+        private void AddScheduledJobToListView(ScheduledJob scheduledJob)
+        {
+            ListViewItem item = new ListViewItem(scheduledJob.Job.Name);
+            item.SubItems.Add(scheduledJob.StartTime.ToString("g"));
+            item.SubItems.Add(scheduledJob.Duration.TotalMinutes.ToString() + " min");
+            item.SubItems.Add(scheduledJob.Status);
+            item.Tag = scheduledJob;
+            scheduledJobsListView.Items.Add(item);
         }
         private void SaveButton_Click(object sender, EventArgs e)
         {
@@ -106,12 +128,12 @@ namespace PingBuddy
                 return;
             }
 
-            // Here we're just setting the DialogResult. The actual saving will be done in MainForm.
+            outputFolder = outputFolderTextBox.Text;
             this.DialogResult = DialogResult.OK;
         }
         public List<ScheduledJob> GetScheduledJobs()
         {
-            return scheduledJobs;
+            return new List<ScheduledJob>(scheduledJobs);
         }
         public string GetOutputFolder()
         {

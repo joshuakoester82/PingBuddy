@@ -12,6 +12,7 @@ using System.Net.Mail;
 using System.Formats.Asn1;
 using CsvHelper;
 using CsvHelper.Configuration;
+using System.Threading;
 
 namespace PingBuddy
 {
@@ -26,10 +27,13 @@ namespace PingBuddy
         private Settings appSettings;
         private DateTime lastNotificationEmailDateTime;
         private ScheduledJobWorker scheduledJobWorker;
+        private SynchronizationContext synchronizationContext;
+        private ScheduleJobForm scheduleJobForm;
 
         public MainForm()
         {
             InitializeComponent();
+            synchronizationContext = SynchronizationContext.Current;
             SetupCustomControls();
             SetupPingWorker();
             LoadSettings();
@@ -49,20 +53,20 @@ namespace PingBuddy
         }
         private void ScheduledJobWorker_JobStarted(object sender, ScheduledJobEventArgs e)
         {
-            this.Invoke((MethodInvoker)delegate
+            synchronizationContext.Post(_ =>
             {
                 UpdateScheduledJobList();
-                // You might want to add the job to a running jobs list in the UI
-            });
+                UpdateScheduleJobFormStatus(e.Job);
+            }, null);
         }
         private void ScheduledJobWorker_JobCompleted(object sender, ScheduledJobEventArgs e)
         {
-            this.Invoke((MethodInvoker)delegate
+            synchronizationContext.Post(_ =>
             {
                 ExportJobResults(e.Job.Job);
                 UpdateScheduledJobList();
-                // You might want to remove the job from a running jobs list in the UI
-            });
+                UpdateScheduleJobFormStatus(e.Job);
+            }, null);
         }
         private void LoadScheduledJobs()
         {
@@ -107,10 +111,18 @@ namespace PingBuddy
         }
         private void ScheduledJobWorker_PingCompleted(object sender, PingResultEventArgs e)
         {
-            this.Invoke((MethodInvoker)delegate
+            synchronizationContext.Post(_ =>
             {
                 UpdatePingResult(e.Job.Job, e.Reply);
-            });
+                UpdateScheduleJobFormStatus(e.Job);
+            }, null);
+        }
+        private void UpdateScheduleJobFormStatus(ScheduledJob job)
+        {
+            if (scheduleJobForm != null && !scheduleJobForm.IsDisposed)
+            {
+                scheduleJobForm.BeginInvoke(new Action(() => scheduleJobForm.UpdateJobStatus(job)));
+            }
         }
         private void ExportJobResults(PingJob job, string outputFolder)
         {
@@ -842,14 +854,19 @@ namespace PingBuddy
         }
         private void ScheduleJobButton_Click(object sender, EventArgs e)
         {
-            using (var scheduleForm = new ScheduleJobForm(pingJobs, scheduledJobs, appSettings.ScheduledJobOutputFolder))
+            using (var scheduleJobForm = new ScheduleJobForm(pingJobs, scheduledJobs, appSettings.ScheduledJobOutputFolder))
             {
-                if (scheduleForm.ShowDialog() == DialogResult.OK)
+                if (scheduleJobForm.ShowDialog() == DialogResult.OK)
                 {
-                    scheduledJobs = scheduleForm.GetScheduledJobs();
-                    appSettings.ScheduledJobOutputFolder = scheduleForm.GetOutputFolder();
+                    scheduledJobs = scheduleJobForm.GetScheduledJobs();
+                    appSettings.ScheduledJobOutputFolder = scheduleJobForm.GetOutputFolder();
                     SaveSettings();
                     UpdateScheduledJobList();
+                    // If you have a ScheduledJobWorker, update it here
+                    if (scheduledJobWorker != null)
+                    {
+                        scheduledJobWorker.UpdateJobs(scheduledJobs);
+                    }
                 }
             }
         }
