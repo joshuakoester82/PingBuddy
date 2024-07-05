@@ -25,6 +25,7 @@ namespace PingBuddy
         private Dictionary<string, List<PingResult>> historicalData = new Dictionary<string, List<PingResult>>();
         private Settings appSettings;
         private DateTime lastNotificationEmailDateTime;
+        private ScheduledJobWorker scheduledJobWorker;
 
         public MainForm()
         {
@@ -33,9 +34,35 @@ namespace PingBuddy
             SetupPingWorker();
             LoadSettings();
             LoadScheduledJobs();
+            SetupScheduledJobWorker();
             UpdateAlertList();
             UpdateResultList();
             WireUpMenuItems();
+        }
+        private void SetupScheduledJobWorker()
+        {
+            scheduledJobWorker = new ScheduledJobWorker(scheduledJobs);
+            scheduledJobWorker.JobStarted += ScheduledJobWorker_JobStarted;
+            scheduledJobWorker.JobCompleted += ScheduledJobWorker_JobCompleted;
+            scheduledJobWorker.PingCompleted += ScheduledJobWorker_PingCompleted;
+            scheduledJobWorker.Start();
+        }
+        private void ScheduledJobWorker_JobStarted(object sender, ScheduledJobEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                UpdateScheduledJobList();
+                // You might want to add the job to a running jobs list in the UI
+            });
+        }
+        private void ScheduledJobWorker_JobCompleted(object sender, ScheduledJobEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                ExportJobResults(e.Job.Job);
+                UpdateScheduledJobList();
+                // You might want to remove the job from a running jobs list in the UI
+            });
         }
         private void LoadScheduledJobs()
         {
@@ -54,8 +81,7 @@ namespace PingBuddy
                         scheduledJobs.Add(new ScheduledJob(
                             matchingPingJob,
                             loadedJob.StartTime,
-                            loadedJob.Duration,
-                            loadedJob.Status
+                            loadedJob.Duration
                         ));
                     }
                 }
@@ -76,6 +102,15 @@ namespace PingBuddy
             string jsonString = JsonSerializer.Serialize(jobsToSave, new JsonSerializerOptions { WriteIndented = true });
             string scheduledJobsPath = Path.Combine(Application.StartupPath, "scheduledJobs.json");
             File.WriteAllText(scheduledJobsPath, jsonString);
+
+            scheduledJobWorker.UpdateJobs(scheduledJobs);
+        }
+        private void ScheduledJobWorker_PingCompleted(object sender, PingResultEventArgs e)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                UpdatePingResult(e.Job.Job, e.Reply);
+            });
         }
         private void ExportJobResults(PingJob job, string outputFolder)
         {
@@ -170,14 +205,13 @@ namespace PingBuddy
         {
             while (!pingWorker.CancellationPending)
             {
-                List<PingJob> allJobs;
+                List<PingJob> jobsToRun;
                 lock (pingJobs)
                 {
-                    allJobs = new List<PingJob>(pingJobs);
-                    allJobs.AddRange(scheduledJobs.Where(j => j.ShouldBeRunning()).Select(j => j.Job));
+                    jobsToRun = new List<PingJob>(pingJobs);
                 }
 
-                foreach (var job in allJobs)
+                foreach (var job in jobsToRun)
                 {
                     if (pingWorker.CancellationPending) break;
 
@@ -188,21 +222,6 @@ namespace PingBuddy
                     });
 
                     System.Threading.Thread.Sleep(job.Interval);
-                }
-
-                // Check for completed scheduled jobs
-                var completedJobs = scheduledJobs.Where(j => DateTime.Now >= j.StartTime.Add(j.Duration)).ToList();
-                foreach (var job in completedJobs)
-                {
-                    ExportJobResults(job.Job);
-                    scheduledJobs.Remove(job);
-                }
-                if (completedJobs.Any())
-                {
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        UpdateScheduledJobList();
-                    });
                 }
             }
         }
@@ -891,10 +910,10 @@ namespace PingBuddy
                 pingWorker.CancelAsync();
                 pingWorker.Dispose();
             }
+            scheduledJobWorker.Stop();
             SaveSettings();
             base.OnFormClosing(e);
         }
-
         private void jobFilterComboBox_SelectedIndexChanged_1(object sender, EventArgs e)
         {
 

@@ -67,8 +67,7 @@ namespace PingBuddy
             ScheduledJob newScheduledJob = new ScheduledJob(
                 selectedJob,
                 startTime,
-                duration,
-                "Pending"
+                duration
             );
 
             scheduledJobs.Add(newScheduledJob);
