@@ -852,15 +852,13 @@ namespace PingBuddy
         }
         private void ScheduleJobButton_Click(object sender, EventArgs e)
         {
-            using (var scheduleJobForm = new ScheduleJobForm(pingJobs, scheduledJobs, appSettings.ScheduledJobOutputFolder))
+            using (var scheduleJobForm = new ScheduleJobForm(pingJobs, scheduledJobs, appSettings))
             {
                 if (scheduleJobForm.ShowDialog() == DialogResult.OK)
                 {
                     scheduledJobs = scheduleJobForm.GetScheduledJobs();
-                    appSettings.ScheduledJobOutputFolder = scheduleJobForm.GetOutputFolder();
                     SaveSettings();
                     UpdateScheduledJobList();
-                    // If you have a ScheduledJobWorker, update it here
                     if (scheduledJobWorker != null)
                     {
                         scheduledJobWorker.UpdateJobs(scheduledJobs);
@@ -876,9 +874,9 @@ namespace PingBuddy
         }
         private void ExportJobResults(PingJob job)
         {
-            if (!job.IsScheduled || !(scheduledJobs.FirstOrDefault(sj => sj.Job == job)?.AutoExport ?? false))
+            if (!job.IsScheduled || !appSettings.AutoExportScheduledJobs)
             {
-                return; // Don't export if it's not a scheduled job or if AutoExport is false
+                return; // Don't export if it's not a scheduled job or if AutoExportScheduledJobs is false
             }
 
             string fileName = $"{job.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";

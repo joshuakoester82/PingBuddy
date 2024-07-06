@@ -9,24 +9,28 @@ namespace PingBuddy
         private List<PingJob> availableJobs;
         private List<ScheduledJob> scheduledJobs;
         private string outputFolder;
+        private Settings appSettings;
 
-        public ScheduleJobForm(List<PingJob> jobs, List<ScheduledJob> existingScheduledJobs, string currentOutputFolder)
+        public ScheduleJobForm(List<PingJob> jobs, List<ScheduledJob> existingScheduledJobs, Settings settings)
         {
             InitializeComponent();
             availableJobs = jobs;
             scheduledJobs = new List<ScheduledJob>(existingScheduledJobs ?? new List<ScheduledJob>());
-            outputFolder = currentOutputFolder;
+            appSettings = settings;
+            outputFolder = settings.ScheduledJobOutputFolder;
 
             PopulateAvailableJobs();
             UpdateScheduledJobsListView();
             outputFolderTextBox.Text = outputFolder;
+            autoExportCheckBox.Checked = appSettings.AutoExportScheduledJobs;
 
             // Wire up button click events
             scheduleButton.Click += ScheduleButton_Click;
             removeScheduledJobButton.Click += RemoveScheduledJobButton_Click;
             saveButton.Click += SaveButton_Click;
-            cancelButton.Click += (s, e) => this.DialogResult = DialogResult.Cancel;
+            cancelButton.Click += CancelButton_Click;
             selectOutputFolderButton.Click += SelectOutputFolderButton_Click;
+            autoExportCheckBox.CheckedChanged += AutoExportCheckBox_CheckedChanged;
         }
 
         private void PopulateAvailableJobs()
@@ -133,8 +137,18 @@ namespace PingBuddy
                 return;
             }
 
-            outputFolder = outputFolderTextBox.Text;
+            appSettings.ScheduledJobOutputFolder = outputFolderTextBox.Text;
             this.DialogResult = DialogResult.OK;
+        }
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            // Discard any changes and close the form
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
+        private void AutoExportCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            appSettings.AutoExportScheduledJobs = autoExportCheckBox.Checked;
         }
         public List<ScheduledJob> GetScheduledJobs()
         {

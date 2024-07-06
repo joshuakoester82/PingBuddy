@@ -13,6 +13,7 @@
     public bool UseSoundAlert { get; set; }
     public int EmailMinuteLimit { get; set; } 
     public string ScheduledJobOutputFolder { get; set; }
+    public bool AutoExportScheduledJobs { get; set; }
 
     public Settings()
     {
@@ -20,5 +21,6 @@
         EmailSmtpPort = 587; // Default port for TLS
         UseEmailNotification = false;
         UseSoundAlert = false;
+        AutoExportScheduledJobs = false;
     }
 }
