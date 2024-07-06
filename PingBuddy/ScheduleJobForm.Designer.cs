@@ -8,246 +8,252 @@
 
         private void InitializeComponent()
         {
-            this.availableJobsListView = new System.Windows.Forms.ListView();
-            this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
-            this.scheduledJobsListView = new System.Windows.Forms.ListView();
-            this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader4 = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader5 = new System.Windows.Forms.ColumnHeader();
-            this.columnHeader6 = new System.Windows.Forms.ColumnHeader();
-            this.startDateTimePicker = new System.Windows.Forms.DateTimePicker();
-            this.durationNumericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.scheduleButton = new System.Windows.Forms.Button();
-            this.removeScheduledJobButton = new System.Windows.Forms.Button();
-            this.outputFolderTextBox = new System.Windows.Forms.TextBox();
-            this.selectOutputFolderButton = new System.Windows.Forms.Button();
-            this.saveButton = new System.Windows.Forms.Button();
-            this.cancelButton = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.durationNumericUpDown)).BeginInit();
-            this.SuspendLayout();
+            availableJobsListView = new ListView();
+            columnHeader1 = new ColumnHeader();
+            columnHeader2 = new ColumnHeader();
+            scheduledJobsListView = new ListView();
+            columnHeader3 = new ColumnHeader();
+            columnHeader4 = new ColumnHeader();
+            columnHeader5 = new ColumnHeader();
+            columnHeader6 = new ColumnHeader();
+            startDateTimePicker = new DateTimePicker();
+            durationNumericUpDown = new NumericUpDown();
+            scheduleButton = new Button();
+            removeScheduledJobButton = new Button();
+            outputFolderTextBox = new TextBox();
+            selectOutputFolderButton = new Button();
+            saveButton = new Button();
+            cancelButton = new Button();
+            label1 = new Label();
+            label2 = new Label();
+            label3 = new Label();
+            label4 = new Label();
+            label5 = new Label();
+            autoExportCheckBox = new CheckBox();
+            ((System.ComponentModel.ISupportInitialize)durationNumericUpDown).BeginInit();
+            SuspendLayout();
             // 
             // availableJobsListView
             // 
-            this.availableJobsListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2});
-            this.availableJobsListView.FullRowSelect = true;
-            this.availableJobsListView.Location = new System.Drawing.Point(12, 32);
-            this.availableJobsListView.Name = "availableJobsListView";
-            this.availableJobsListView.Size = new System.Drawing.Size(300, 200);
-            this.availableJobsListView.TabIndex = 0;
-            this.availableJobsListView.UseCompatibleStateImageBehavior = false;
-            this.availableJobsListView.View = System.Windows.Forms.View.Details;
+            availableJobsListView.Columns.AddRange(new ColumnHeader[] { columnHeader1, columnHeader2 });
+            availableJobsListView.FullRowSelect = true;
+            availableJobsListView.Location = new Point(17, 53);
+            availableJobsListView.Margin = new Padding(4, 5, 4, 5);
+            availableJobsListView.Name = "availableJobsListView";
+            availableJobsListView.Size = new Size(446, 577);
+            availableJobsListView.TabIndex = 0;
+            availableJobsListView.UseCompatibleStateImageBehavior = false;
+            availableJobsListView.View = View.Details;
             // 
             // columnHeader1
             // 
-            this.columnHeader1.Text = "Name";
-            this.columnHeader1.Width = 150;
+            columnHeader1.Text = "Name";
+            columnHeader1.Width = 150;
             // 
             // columnHeader2
             // 
-            this.columnHeader2.Text = "Host";
-            this.columnHeader2.Width = 150;
+            columnHeader2.Text = "Host";
+            columnHeader2.Width = 220;
             // 
             // scheduledJobsListView
             // 
-            this.scheduledJobsListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader3,
-            this.columnHeader4,
-            this.columnHeader5,
-            this.columnHeader6});
-            this.scheduledJobsListView.FullRowSelect = true;
-            this.scheduledJobsListView.Location = new System.Drawing.Point(322, 32);
-            this.scheduledJobsListView.Name = "scheduledJobsListView";
-            this.scheduledJobsListView.Size = new System.Drawing.Size(450, 200);
-            this.scheduledJobsListView.TabIndex = 1;
-            this.scheduledJobsListView.UseCompatibleStateImageBehavior = false;
-            this.scheduledJobsListView.View = System.Windows.Forms.View.Details;
+            scheduledJobsListView.Columns.AddRange(new ColumnHeader[] { columnHeader3, columnHeader4, columnHeader5, columnHeader6 });
+            scheduledJobsListView.FullRowSelect = true;
+            scheduledJobsListView.Location = new Point(480, 52);
+            scheduledJobsListView.Margin = new Padding(4, 5, 4, 5);
+            scheduledJobsListView.Name = "scheduledJobsListView";
+            scheduledJobsListView.Size = new Size(967, 578);
+            scheduledJobsListView.TabIndex = 1;
+            scheduledJobsListView.UseCompatibleStateImageBehavior = false;
+            scheduledJobsListView.View = View.Details;
+            scheduledJobsListView.SelectedIndexChanged += scheduledJobsListView_SelectedIndexChanged;
             // 
             // columnHeader3
             // 
-            this.columnHeader3.Text = "Name";
-            this.columnHeader3.Width = 100;
+            columnHeader3.Text = "Name";
+            columnHeader3.Width = 150;
             // 
             // columnHeader4
             // 
-            this.columnHeader4.Text = "Start Time";
-            this.columnHeader4.Width = 120;
+            columnHeader4.Text = "Start Time";
+            columnHeader4.Width = 200;
             // 
             // columnHeader5
             // 
-            this.columnHeader5.Text = "Duration";
-            this.columnHeader5.Width = 80;
+            columnHeader5.Text = "Duration";
+            columnHeader5.Width = 200;
             // 
             // columnHeader6
             // 
-            this.columnHeader6.Text = "Status";
-            this.columnHeader6.Width = 80;
+            columnHeader6.Text = "Status";
+            columnHeader6.Width = 200;
             // 
             // startDateTimePicker
             // 
-            this.startDateTimePicker.CustomFormat = "MM/dd/yyyy HH:mm:ss";
-            this.startDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.startDateTimePicker.Location = new System.Drawing.Point(12, 258);
-            this.startDateTimePicker.Name = "startDateTimePicker";
-            this.startDateTimePicker.Size = new System.Drawing.Size(200, 23);
-            this.startDateTimePicker.TabIndex = 2;
+            startDateTimePicker.CustomFormat = "MM/dd/yyyy HH:mm:ss";
+            startDateTimePicker.Format = DateTimePickerFormat.Custom;
+            startDateTimePicker.Location = new Point(17, 687);
+            startDateTimePicker.Margin = new Padding(4, 5, 4, 5);
+            startDateTimePicker.Name = "startDateTimePicker";
+            startDateTimePicker.Size = new Size(284, 31);
+            startDateTimePicker.TabIndex = 2;
             // 
             // durationNumericUpDown
             // 
-            this.durationNumericUpDown.Location = new System.Drawing.Point(222, 258);
-            this.durationNumericUpDown.Maximum = new decimal(new int[] {
-            1440,
-            0,
-            0,
-            0});
-            this.durationNumericUpDown.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.durationNumericUpDown.Name = "durationNumericUpDown";
-            this.durationNumericUpDown.Size = new System.Drawing.Size(90, 23);
-            this.durationNumericUpDown.TabIndex = 3;
-            this.durationNumericUpDown.Value = new decimal(new int[] {
-            60,
-            0,
-            0,
-            0});
+            durationNumericUpDown.Location = new Point(317, 687);
+            durationNumericUpDown.Margin = new Padding(4, 5, 4, 5);
+            durationNumericUpDown.Maximum = new decimal(new int[] { 1440, 0, 0, 0 });
+            durationNumericUpDown.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            durationNumericUpDown.Name = "durationNumericUpDown";
+            durationNumericUpDown.Size = new Size(129, 31);
+            durationNumericUpDown.TabIndex = 3;
+            durationNumericUpDown.Value = new decimal(new int[] { 60, 0, 0, 0 });
             // 
             // scheduleButton
             // 
-            this.scheduleButton.Location = new System.Drawing.Point(322, 258);
-            this.scheduleButton.Name = "scheduleButton";
-            this.scheduleButton.Size = new System.Drawing.Size(75, 23);
-            this.scheduleButton.TabIndex = 4;
-            this.scheduleButton.Text = "Schedule";
-            this.scheduleButton.UseVisualStyleBackColor = true;
-            //this.scheduleButton.Click += new System.EventHandler(this.scheduleButton_Click);
+            scheduleButton.Location = new Point(460, 687);
+            scheduleButton.Margin = new Padding(4, 5, 4, 5);
+            scheduleButton.Name = "scheduleButton";
+            scheduleButton.Size = new Size(107, 38);
+            scheduleButton.TabIndex = 4;
+            scheduleButton.Text = "Schedule";
+            scheduleButton.UseVisualStyleBackColor = true;
             // 
             // removeScheduledJobButton
             // 
-            this.removeScheduledJobButton.Location = new System.Drawing.Point(697, 238);
-            this.removeScheduledJobButton.Name = "removeScheduledJobButton";
-            this.removeScheduledJobButton.Size = new System.Drawing.Size(75, 23);
-            this.removeScheduledJobButton.TabIndex = 5;
-            this.removeScheduledJobButton.Text = "Remove";
-            this.removeScheduledJobButton.UseVisualStyleBackColor = true;
-            //this.removeScheduledJobButton.Click += new System.EventHandler(this.removeScheduledJobButton_Click);
+            removeScheduledJobButton.Location = new Point(588, 687);
+            removeScheduledJobButton.Margin = new Padding(4, 5, 4, 5);
+            removeScheduledJobButton.Name = "removeScheduledJobButton";
+            removeScheduledJobButton.Size = new Size(107, 38);
+            removeScheduledJobButton.TabIndex = 5;
+            removeScheduledJobButton.Text = "Remove";
+            removeScheduledJobButton.UseVisualStyleBackColor = true;
             // 
             // outputFolderTextBox
             // 
-            this.outputFolderTextBox.Location = new System.Drawing.Point(12, 308);
-            this.outputFolderTextBox.Name = "outputFolderTextBox";
-            this.outputFolderTextBox.Size = new System.Drawing.Size(300, 23);
-            this.outputFolderTextBox.TabIndex = 6;
+            outputFolderTextBox.Location = new Point(17, 770);
+            outputFolderTextBox.Margin = new Padding(4, 5, 4, 5);
+            outputFolderTextBox.Name = "outputFolderTextBox";
+            outputFolderTextBox.Size = new Size(427, 31);
+            outputFolderTextBox.TabIndex = 6;
             // 
             // selectOutputFolderButton
             // 
-            this.selectOutputFolderButton.Location = new System.Drawing.Point(322, 308);
-            this.selectOutputFolderButton.Name = "selectOutputFolderButton";
-            this.selectOutputFolderButton.Size = new System.Drawing.Size(75, 23);
-            this.selectOutputFolderButton.TabIndex = 7;
-            this.selectOutputFolderButton.Text = "Browse";
-            this.selectOutputFolderButton.UseVisualStyleBackColor = true;
-            //this.selectOutputFolderButton.Click += new System.EventHandler(this.selectOutputFolderButton_Click);
+            selectOutputFolderButton.Location = new Point(460, 770);
+            selectOutputFolderButton.Margin = new Padding(4, 5, 4, 5);
+            selectOutputFolderButton.Name = "selectOutputFolderButton";
+            selectOutputFolderButton.Size = new Size(107, 38);
+            selectOutputFolderButton.TabIndex = 7;
+            selectOutputFolderButton.Text = "Browse";
+            selectOutputFolderButton.UseVisualStyleBackColor = true;
             // 
             // saveButton
             // 
-            this.saveButton.Location = new System.Drawing.Point(616, 338);
-            this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(75, 23);
-            this.saveButton.TabIndex = 8;
-            this.saveButton.Text = "Save";
-            this.saveButton.UseVisualStyleBackColor = true;
-            //this.saveButton.Click += new System.EventHandler(this.saveButton_Click);
+            saveButton.Location = new Point(1224, 770);
+            saveButton.Margin = new Padding(4, 5, 4, 5);
+            saveButton.Name = "saveButton";
+            saveButton.Size = new Size(107, 38);
+            saveButton.TabIndex = 8;
+            saveButton.Text = "Save";
+            saveButton.UseVisualStyleBackColor = true;
             // 
             // cancelButton
             // 
-            this.cancelButton.Location = new System.Drawing.Point(697, 338);
-            this.cancelButton.Name = "cancelButton";
-            this.cancelButton.Size = new System.Drawing.Size(75, 23);
-            this.cancelButton.TabIndex = 9;
-            this.cancelButton.Text = "Cancel";
-            this.cancelButton.UseVisualStyleBackColor = true;
-            //this.cancelButton.Click += new System.EventHandler(this.cancelButton_Click);
+            cancelButton.Location = new Point(1340, 770);
+            cancelButton.Margin = new Padding(4, 5, 4, 5);
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new Size(107, 38);
+            cancelButton.TabIndex = 9;
+            cancelButton.Text = "Cancel";
+            cancelButton.UseVisualStyleBackColor = true;
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 13);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(83, 15);
-            this.label1.TabIndex = 10;
-            this.label1.Text = "Available Jobs:";
+            label1.AutoSize = true;
+            label1.Location = new Point(17, 22);
+            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(128, 25);
+            label1.TabIndex = 10;
+            label1.Text = "Available Jobs:";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(322, 13);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(89, 15);
-            this.label2.TabIndex = 11;
-            this.label2.Text = "Scheduled Jobs:";
+            label2.AutoSize = true;
+            label2.Location = new Point(480, 22);
+            label2.Margin = new Padding(4, 0, 4, 0);
+            label2.Name = "label2";
+            label2.Size = new Size(139, 25);
+            label2.TabIndex = 11;
+            label2.Text = "Scheduled Jobs:";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 240);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(61, 15);
-            this.label3.TabIndex = 12;
-            this.label3.Text = "Start Time:";
+            label3.AutoSize = true;
+            label3.Location = new Point(17, 657);
+            label3.Margin = new Padding(4, 0, 4, 0);
+            label3.Name = "label3";
+            label3.Size = new Size(95, 25);
+            label3.TabIndex = 12;
+            label3.Text = "Start Time:";
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(222, 240);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(96, 15);
-            this.label4.TabIndex = 13;
-            this.label4.Text = "Duration (mins):";
+            label4.AutoSize = true;
+            label4.Location = new Point(317, 657);
+            label4.Margin = new Padding(4, 0, 4, 0);
+            label4.Name = "label4";
+            label4.Size = new Size(138, 25);
+            label4.TabIndex = 13;
+            label4.Text = "Duration (mins):";
             // 
             // label5
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 290);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(85, 15);
-            this.label5.TabIndex = 14;
-            this.label5.Text = "Output Folder:";
+            label5.AutoSize = true;
+            label5.Location = new Point(17, 740);
+            label5.Margin = new Padding(4, 0, 4, 0);
+            label5.Name = "label5";
+            label5.Size = new Size(128, 25);
+            label5.TabIndex = 14;
+            label5.Text = "Output Folder:";
+            // 
+            // autoExportCheckBox
+            // 
+            autoExportCheckBox.AutoSize = true;
+            autoExportCheckBox.Location = new Point(17, 810);
+            autoExportCheckBox.Name = "autoExportCheckBox";
+            autoExportCheckBox.Size = new Size(367, 29);
+            autoExportCheckBox.TabIndex = 15;
+            autoExportCheckBox.Text = "Automatically export when job completes";
+            autoExportCheckBox.UseVisualStyleBackColor = true;
             // 
             // ScheduleJobForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 371);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.cancelButton);
-            this.Controls.Add(this.saveButton);
-            this.Controls.Add(this.selectOutputFolderButton);
-            this.Controls.Add(this.outputFolderTextBox);
-            this.Controls.Add(this.removeScheduledJobButton);
-            this.Controls.Add(this.scheduleButton);
-            this.Controls.Add(this.durationNumericUpDown);
-            this.Controls.Add(this.startDateTimePicker);
-            this.Controls.Add(this.scheduledJobsListView);
-            this.Controls.Add(this.availableJobsListView);
-            this.Name = "ScheduleJobForm";
-            this.Text = "Schedule Jobs";
-            ((System.ComponentModel.ISupportInitialize)(this.durationNumericUpDown)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(1475, 852);
+            Controls.Add(label5);
+            Controls.Add(label4);
+            Controls.Add(label3);
+            Controls.Add(label2);
+            Controls.Add(label1);
+            Controls.Add(cancelButton);
+            Controls.Add(saveButton);
+            Controls.Add(selectOutputFolderButton);
+            Controls.Add(outputFolderTextBox);
+            Controls.Add(removeScheduledJobButton);
+            Controls.Add(scheduleButton);
+            Controls.Add(durationNumericUpDown);
+            Controls.Add(startDateTimePicker);
+            Controls.Add(scheduledJobsListView);
+            Controls.Add(availableJobsListView);
+            Controls.Add(autoExportCheckBox);
+            Margin = new Padding(4, 5, 4, 5);
+            Name = "ScheduleJobForm";
+            Text = "Schedule Jobs";
+            ((System.ComponentModel.ISupportInitialize)durationNumericUpDown).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -273,5 +279,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox autoExportCheckBox;
     }
 }

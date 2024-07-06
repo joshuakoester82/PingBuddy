@@ -12,29 +12,120 @@ using System.Net.Mail;
 using System.Formats.Asn1;
 using CsvHelper;
 using CsvHelper.Configuration;
+using System.Threading;
 
 namespace PingBuddy
 {
     public partial class MainForm : Form
     {
         private List<PingJob> pingJobs = new List<PingJob>();
-        private List<PingJob> scheduledJobs = new List<PingJob>();
+        private List<ScheduledJob> scheduledJobs = new List<ScheduledJob>();
         private BackgroundWorker pingWorker;
         private bool isRunning = false;
         private List<Alert> alertLog = new List<Alert>();
         private Dictionary<string, List<PingResult>> historicalData = new Dictionary<string, List<PingResult>>();
         private Settings appSettings;
         private DateTime lastNotificationEmailDateTime;
+        private ScheduledJobWorker scheduledJobWorker;
+        private SynchronizationContext synchronizationContext;
+        private ScheduleJobForm scheduleJobForm;
 
         public MainForm()
         {
             InitializeComponent();
+            synchronizationContext = SynchronizationContext.Current;
             SetupCustomControls();
             SetupPingWorker();
             LoadSettings();
+            LoadScheduledJobs();
+            SetupScheduledJobWorker();
             UpdateAlertList();
             UpdateResultList();
             WireUpMenuItems();
+        }
+        private void SetupScheduledJobWorker()
+        {
+            scheduledJobWorker = new ScheduledJobWorker(scheduledJobs);
+            scheduledJobWorker.JobStarted += ScheduledJobWorker_JobStarted;
+            scheduledJobWorker.JobCompleted += ScheduledJobWorker_JobCompleted;
+            scheduledJobWorker.PingCompleted += ScheduledJobWorker_PingCompleted;
+            scheduledJobWorker.Start();
+        }
+        private void ScheduledJobWorker_JobStarted(object sender, ScheduledJobEventArgs e)
+        {
+            synchronizationContext.Post(_ =>
+            {
+                UpdateScheduledJobList();
+                UpdateScheduleJobFormStatus(e.Job);
+            }, null);
+        }
+        private void ScheduledJobWorker_JobCompleted(object sender, ScheduledJobEventArgs e)
+        {
+            synchronizationContext.Post(_ =>
+            {
+                ExportJobResults(e.Job.Job);
+                UpdateScheduledJobList();
+                UpdateScheduleJobFormStatus(e.Job);
+            }, null);
+        }
+        private void LoadScheduledJobs()
+        {
+            string scheduledJobsPath = Path.Combine(Application.StartupPath, "scheduledJobs.json");
+            if (File.Exists(scheduledJobsPath))
+            {
+                string jsonString = File.ReadAllText(scheduledJobsPath);
+                var loadedJobs = JsonSerializer.Deserialize<List<ScheduledJobSaveData>>(jsonString);
+
+                scheduledJobs.Clear();
+                foreach (var loadedJob in loadedJobs)
+                {
+                    var matchingPingJob = pingJobs.FirstOrDefault(j => j.Name == loadedJob.JobName);
+                    if (matchingPingJob != null)
+                    {
+                        scheduledJobs.Add(new ScheduledJob(
+                            matchingPingJob,
+                            loadedJob.StartTime,
+                            loadedJob.Duration,
+                            true // TODO: fix this implementation to pull from settings. The checkbox state needs to be a part of settings.
+                        ));
+                    }
+                }
+
+                UpdateScheduledJobList();
+            }
+        }
+        private void SaveScheduledJobs()
+        {
+            var jobsToSave = scheduledJobs.Select(sj => new ScheduledJobSaveData
+            {
+                JobName = sj.Job.Name,
+                StartTime = sj.StartTime,
+                Duration = sj.Duration,
+                Status = sj.Status,
+                ResultsExported = sj.ResultsExported,
+                AutoExport = sj.AutoExport
+            }).ToList();
+
+            string jsonString = JsonSerializer.Serialize(jobsToSave, new JsonSerializerOptions { WriteIndented = true });
+            string scheduledJobsPath = Path.Combine(Application.StartupPath, "scheduledJobs.json");
+            File.WriteAllText(scheduledJobsPath, jsonString);
+
+            scheduledJobWorker.UpdateJobs(scheduledJobs);
+        }
+        private void ScheduledJobWorker_PingCompleted(object sender, PingResultEventArgs e)
+        {
+            synchronizationContext.Post(_ =>
+            {
+                UpdatePingResult(e.Job.Job, e.Reply);
+                UpdateScheduleJobFormStatus(e.Job);
+            }, null);
+        }
+        private void UpdateScheduleJobFormStatus(ScheduledJob job)
+        {
+            if (scheduleJobForm != null && !scheduleJobForm.IsDisposed)
+            {
+                scheduleJobForm.BeginInvoke(new Action(() => scheduleJobForm.UpdateJobStatus(job)));
+            }
         }
         private void SetupCustomControls()
         {
@@ -124,14 +215,13 @@ namespace PingBuddy
         {
             while (!pingWorker.CancellationPending)
             {
-                List<PingJob> allJobs;
+                List<PingJob> jobsToRun;
                 lock (pingJobs)
                 {
-                    allJobs = new List<PingJob>(pingJobs);
-                    allJobs.AddRange(scheduledJobs.Where(j => j.ShouldBeRunning()));
+                    jobsToRun = new List<PingJob>(pingJobs);
                 }
 
-                foreach (var job in allJobs)
+                foreach (var job in jobsToRun)
                 {
                     if (pingWorker.CancellationPending) break;
 
@@ -142,21 +232,6 @@ namespace PingBuddy
                     });
 
                     System.Threading.Thread.Sleep(job.Interval);
-                }
-
-                // Check for completed scheduled jobs
-                var completedJobs = scheduledJobs.Where(j => DateTime.Now >= j.ScheduledStartTime.Value.Add(j.Duration)).ToList();
-                foreach (var job in completedJobs)
-                {
-                    ExportJobResults(job);
-                    scheduledJobs.Remove(job);
-                }
-                if (completedJobs.Any())
-                {
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        UpdateScheduledJobList();
-                    });
                 }
             }
         }
@@ -474,7 +549,10 @@ namespace PingBuddy
             }
             else
             {
-                appSettings = new Settings();
+                appSettings = new Settings
+                {
+                    ScheduledJobOutputFolder = Path.Combine(Application.StartupPath, "ScheduledJobResults")
+                };
             }
 
             // Load ping jobs from settings
@@ -774,35 +852,72 @@ namespace PingBuddy
         }
         private void ScheduleJobButton_Click(object sender, EventArgs e)
         {
-            using (var scheduleForm = new ScheduleJobForm())
+            using (var scheduleJobForm = new ScheduleJobForm(pingJobs, scheduledJobs, appSettings))
             {
-                if (scheduleForm.ShowDialog() == DialogResult.OK)
+                if (scheduleJobForm.ShowDialog() == DialogResult.OK)
                 {
-                    //scheduledJobs.AddRange(scheduleForm.ScheduledJobs);
+                    scheduledJobs = scheduleJobForm.GetScheduledJobs();
+                    SaveSettings();
                     UpdateScheduledJobList();
+                    if (scheduledJobWorker != null)
+                    {
+                        scheduledJobWorker.UpdateJobs(scheduledJobs);
+                    }
                 }
             }
         }
         private void UpdateScheduledJobList()
         {
-            var scheduledJobList = (ListBox)Controls.Find("scheduledJobList", true).FirstOrDefault();
-            if (scheduledJobList != null)
-            {
-                scheduledJobList.Items.Clear();
-                scheduledJobList.Items.AddRange(scheduledJobs.Select(j => $"{j.Name} - {j.ScheduledStartTime:g} ({j.Duration.TotalMinutes} min)").ToArray());
-            }
+            // Update UI to show scheduled jobs (you might want to add a new ListBox for this)
+            // For now, we'll just update the status strip
+            statusLabel.Text = $"Scheduled Jobs: {scheduledJobs.Count}";
         }
         private void ExportJobResults(PingJob job)
         {
-            string fileName = $"{job.Name}_{job.ScheduledStartTime:yyyyMMdd_HHmmss}.csv";
-            string filePath = Path.Combine(Application.StartupPath, "ScheduledJobResults", fileName);
-
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
-            using (var writer = new StreamWriter(filePath))
-            using (var csv = new CsvHelper.CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture))
+            if (!job.IsScheduled || !appSettings.AutoExportScheduledJobs)
             {
-                csv.WriteRecords(job.PingResults);
+                return; // Don't export if it's not a scheduled job or if AutoExportScheduledJobs is false
+            }
+
+            string fileName = $"{job.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            string filePath = Path.Combine(appSettings.ScheduledJobOutputFolder, fileName);
+
+            try
+            {
+                Directory.CreateDirectory(appSettings.ScheduledJobOutputFolder);
+
+                using (var writer = new StreamWriter(filePath))
+                using (var csv = new CsvWriter(writer, new CsvConfiguration(System.Globalization.CultureInfo.InvariantCulture)))
+                {
+                    // Write header
+                    csv.WriteField("Timestamp");
+                    csv.WriteField("Job Name");
+                    csv.WriteField("Host");
+                    csv.WriteField("Status");
+                    csv.WriteField("Latency (ms)");
+                    csv.WriteField("Alert Type");
+                    csv.WriteField("Alert Message");
+                    csv.NextRecord();
+
+                    // Write data
+                    foreach (var result in job.PingResults)
+                    {
+                        csv.WriteField(result.Timestamp);
+                        csv.WriteField(job.Name);
+                        csv.WriteField(job.Host);
+                        csv.WriteField(result.Status);
+                        csv.WriteField(result.Latency);
+                        csv.WriteField(result.AlertType?.ToString() ?? "");
+                        csv.WriteField(result.AlertMessage ?? "");
+                        csv.NextRecord();
+                    }
+                }
+
+                Console.WriteLine($"Results exported to: {filePath}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error exporting results: {ex.Message}", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void JobFilterComboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -843,10 +958,10 @@ namespace PingBuddy
                 pingWorker.CancelAsync();
                 pingWorker.Dispose();
             }
+            scheduledJobWorker.Stop();
             SaveSettings();
             base.OnFormClosing(e);
         }
-
         private void jobFilterComboBox_SelectedIndexChanged_1(object sender, EventArgs e)
         {
 
