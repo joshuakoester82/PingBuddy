@@ -205,7 +205,7 @@
             // 
             // viewChartButton
             // 
-            viewChartButton.Location = new Point(227, 964);
+            viewChartButton.Location = new Point(200, 960);
             viewChartButton.Margin = new Padding(5, 6, 5, 6);
             viewChartButton.Name = "viewChartButton";
             viewChartButton.Size = new Size(200, 58);
@@ -255,7 +255,7 @@
             // 
             // clearResultsButton
             // 
-            clearResultsButton.Location = new Point(227, 820);
+            clearResultsButton.Location = new Point(200, 820);
             clearResultsButton.Margin = new Padding(5, 6, 5, 6);
             clearResultsButton.Name = "clearResultsButton";
             clearResultsButton.Size = new Size(200, 58);
@@ -265,7 +265,7 @@
             // 
             // clearAlertsButton
             // 
-            clearAlertsButton.Location = new Point(227, 894);
+            clearAlertsButton.Location = new Point(200, 890);
             clearAlertsButton.Margin = new Padding(5, 6, 5, 6);
             clearAlertsButton.Name = "clearAlertsButton";
             clearAlertsButton.Size = new Size(200, 58);
