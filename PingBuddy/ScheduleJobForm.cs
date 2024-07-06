@@ -158,5 +158,10 @@ namespace PingBuddy
         {
             return outputFolder;
         }
+
+        private void scheduledJobsListView_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

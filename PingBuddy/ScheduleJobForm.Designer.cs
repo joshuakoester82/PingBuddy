@@ -29,19 +29,9 @@
             label3 = new Label();
             label4 = new Label();
             label5 = new Label();
+            autoExportCheckBox = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)durationNumericUpDown).BeginInit();
             SuspendLayout();
-            //
-            // autoExportCheckbox
-            //
-            autoExportCheckBox = new CheckBox();
-            autoExportCheckBox.AutoSize = true;
-            autoExportCheckBox.Location = new Point(17, 810);
-            autoExportCheckBox.Name = "autoExportCheckBox";
-            autoExportCheckBox.Size = new Size(250, 29);
-            autoExportCheckBox.TabIndex = 15;
-            autoExportCheckBox.Text = "Automatically export when job completes";
-            autoExportCheckBox.UseVisualStyleBackColor = true;
             // 
             // availableJobsListView
             // 
@@ -63,7 +53,7 @@
             // columnHeader2
             // 
             columnHeader2.Text = "Host";
-            columnHeader2.Width = 150;
+            columnHeader2.Width = 220;
             // 
             // scheduledJobsListView
             // 
@@ -76,26 +66,27 @@
             scheduledJobsListView.TabIndex = 1;
             scheduledJobsListView.UseCompatibleStateImageBehavior = false;
             scheduledJobsListView.View = View.Details;
+            scheduledJobsListView.SelectedIndexChanged += scheduledJobsListView_SelectedIndexChanged;
             // 
             // columnHeader3
             // 
             columnHeader3.Text = "Name";
-            columnHeader3.Width = 100;
+            columnHeader3.Width = 150;
             // 
             // columnHeader4
             // 
             columnHeader4.Text = "Start Time";
-            columnHeader4.Width = 120;
+            columnHeader4.Width = 200;
             // 
             // columnHeader5
             // 
             columnHeader5.Text = "Duration";
-            columnHeader5.Width = 80;
+            columnHeader5.Width = 200;
             // 
             // columnHeader6
             // 
             columnHeader6.Text = "Status";
-            columnHeader6.Width = 80;
+            columnHeader6.Width = 200;
             // 
             // startDateTimePicker
             // 
@@ -225,6 +216,16 @@
             label5.Size = new Size(128, 25);
             label5.TabIndex = 14;
             label5.Text = "Output Folder:";
+            // 
+            // autoExportCheckBox
+            // 
+            autoExportCheckBox.AutoSize = true;
+            autoExportCheckBox.Location = new Point(17, 810);
+            autoExportCheckBox.Name = "autoExportCheckBox";
+            autoExportCheckBox.Size = new Size(367, 29);
+            autoExportCheckBox.TabIndex = 15;
+            autoExportCheckBox.Text = "Automatically export when job completes";
+            autoExportCheckBox.UseVisualStyleBackColor = true;
             // 
             // ScheduleJobForm
             // 
