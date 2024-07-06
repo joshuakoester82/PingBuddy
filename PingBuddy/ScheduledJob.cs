@@ -6,6 +6,7 @@ public class ScheduledJob
     public DateTime StartTime { get; }
     public TimeSpan Duration { get; }
     public string Status { get; private set; }
+    public bool ResultsExported { get; set; }
 
     public ScheduledJob(PingJob job, DateTime startTime, TimeSpan duration)
     {
@@ -13,6 +14,7 @@ public class ScheduledJob
         StartTime = startTime;
         Duration = duration;
         Status = "Pending";
+        ResultsExported = false;
 
         // Set the scheduled properties of the PingJob
         Job.IsScheduled = true;
@@ -27,15 +29,16 @@ public class ScheduledJob
 
     public void UpdateStatus()
     {
-        if (DateTime.Now < StartTime)
+        DateTime now = DateTime.Now;
+        if (now < StartTime)
         {
             Status = "Pending";
         }
-        else if (ShouldBeRunning())
+        else if (now >= StartTime && now < StartTime.Add(Duration))
         {
             Status = "Running";
         }
-        else if (DateTime.Now >= StartTime.Add(Duration))
+        else if (now >= StartTime.Add(Duration))
         {
             Status = "Completed";
         }

@@ -77,10 +77,10 @@ namespace PingBuddy
                         // Sleep for the job's interval
                         Thread.Sleep(job.Job.Interval);
                     }
-                    else if (job.Status == "Completed")
+                    else if (job.Status == "Completed" && !job.ResultsExported)
                     {
                         OnJobCompleted(job);
-                        scheduledJobs.Remove(job);
+                        job.ResultsExported = true;
                     }
                 }
             }

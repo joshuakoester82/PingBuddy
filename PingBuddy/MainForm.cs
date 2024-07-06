@@ -101,6 +101,7 @@ namespace PingBuddy
                 StartTime = sj.StartTime,
                 Duration = sj.Duration,
                 Status = sj.Status,
+                ResultsExported = sj.ResultsExported
             }).ToList();
 
             string jsonString = JsonSerializer.Serialize(jobsToSave, new JsonSerializerOptions { WriteIndented = true });
@@ -878,15 +879,24 @@ namespace PingBuddy
         }
         private void ExportJobResults(PingJob job)
         {
-            string fileName = $"{job.Name}_{job.ScheduledStartTime:yyyyMMdd_HHmmss}.csv";
-            string filePath = Path.Combine(Application.StartupPath, "ScheduledJobResults", fileName);
+            string fileName = $"{job.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+            string filePath = Path.Combine(appSettings.ScheduledJobOutputFolder, fileName);
 
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
-            using (var writer = new StreamWriter(filePath))
-            using (var csv = new CsvHelper.CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture))
+            try
             {
-                csv.WriteRecords(job.PingResults);
+                Directory.CreateDirectory(appSettings.ScheduledJobOutputFolder);
+
+                using (var writer = new StreamWriter(filePath))
+                using (var csv = new CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture))
+                {
+                    csv.WriteRecords(job.PingResults);
+                }
+
+                Console.WriteLine($"Results exported to: {filePath}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error exporting results: {ex.Message}", "Export Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void JobFilterComboBox_SelectedIndexChanged(object sender, EventArgs e)
