@@ -87,7 +87,12 @@ namespace PingBuddy
             DateTime startTime = startDateTimePicker.Value;
             TimeSpan duration = TimeSpan.FromMinutes((double)durationNumericUpDown.Value);
 
-            ScheduledJob newScheduledJob = new ScheduledJob(selectedJob, startTime, duration);
+            ScheduledJob newScheduledJob = new ScheduledJob(
+            selectedJob,
+            startTime,
+            duration,
+            autoExportCheckBox.Checked
+        );
             scheduledJobs.Add(newScheduledJob);
             UpdateScheduledJobsListView();
         }

@@ -85,7 +85,8 @@ namespace PingBuddy
                         scheduledJobs.Add(new ScheduledJob(
                             matchingPingJob,
                             loadedJob.StartTime,
-                            loadedJob.Duration
+                            loadedJob.Duration,
+                            true // TODO: fix this implementation to pull from settings. The checkbox state needs to be a part of settings.
                         ));
                     }
                 }
@@ -101,7 +102,8 @@ namespace PingBuddy
                 StartTime = sj.StartTime,
                 Duration = sj.Duration,
                 Status = sj.Status,
-                ResultsExported = sj.ResultsExported
+                ResultsExported = sj.ResultsExported,
+                AutoExport = sj.AutoExport
             }).ToList();
 
             string jsonString = JsonSerializer.Serialize(jobsToSave, new JsonSerializerOptions { WriteIndented = true });
@@ -124,11 +126,6 @@ namespace PingBuddy
             {
                 scheduleJobForm.BeginInvoke(new Action(() => scheduleJobForm.UpdateJobStatus(job)));
             }
-        }
-        private void ExportJobResults(PingJob job, string outputFolder)
-        {
-            // Implement the logic to export job results to the specified output folder
-            // This method should be called when a scheduled job completes
         }
         private void SetupCustomControls()
         {
@@ -879,6 +876,11 @@ namespace PingBuddy
         }
         private void ExportJobResults(PingJob job)
         {
+            if (!job.IsScheduled || !(scheduledJobs.FirstOrDefault(sj => sj.Job == job)?.AutoExport ?? false))
+            {
+                return; // Don't export if it's not a scheduled job or if AutoExport is false
+            }
+
             string fileName = $"{job.Name}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
             string filePath = Path.Combine(appSettings.ScheduledJobOutputFolder, fileName);
 
@@ -887,9 +889,30 @@ namespace PingBuddy
                 Directory.CreateDirectory(appSettings.ScheduledJobOutputFolder);
 
                 using (var writer = new StreamWriter(filePath))
-                using (var csv = new CsvWriter(writer, System.Globalization.CultureInfo.InvariantCulture))
+                using (var csv = new CsvWriter(writer, new CsvConfiguration(System.Globalization.CultureInfo.InvariantCulture)))
                 {
-                    csv.WriteRecords(job.PingResults);
+                    // Write header
+                    csv.WriteField("Timestamp");
+                    csv.WriteField("Job Name");
+                    csv.WriteField("Host");
+                    csv.WriteField("Status");
+                    csv.WriteField("Latency (ms)");
+                    csv.WriteField("Alert Type");
+                    csv.WriteField("Alert Message");
+                    csv.NextRecord();
+
+                    // Write data
+                    foreach (var result in job.PingResults)
+                    {
+                        csv.WriteField(result.Timestamp);
+                        csv.WriteField(job.Name);
+                        csv.WriteField(job.Host);
+                        csv.WriteField(result.Status);
+                        csv.WriteField(result.Latency);
+                        csv.WriteField(result.AlertType?.ToString() ?? "");
+                        csv.WriteField(result.AlertMessage ?? "");
+                        csv.NextRecord();
+                    }
                 }
 
                 Console.WriteLine($"Results exported to: {filePath}");

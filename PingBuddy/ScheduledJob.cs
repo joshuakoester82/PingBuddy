@@ -7,14 +7,16 @@ public class ScheduledJob
     public TimeSpan Duration { get; }
     public string Status { get; private set; }
     public bool ResultsExported { get; set; }
+    public bool AutoExport { get; set; }
 
-    public ScheduledJob(PingJob job, DateTime startTime, TimeSpan duration)
+    public ScheduledJob(PingJob job, DateTime startTime, TimeSpan duration, bool autoExport)
     {
         Job = job;
         StartTime = startTime;
         Duration = duration;
         Status = "Pending";
         ResultsExported = false;
+        AutoExport = autoExport;
 
         // Set the scheduled properties of the PingJob
         Job.IsScheduled = true;

@@ -31,6 +31,17 @@
             label5 = new Label();
             ((System.ComponentModel.ISupportInitialize)durationNumericUpDown).BeginInit();
             SuspendLayout();
+            //
+            // autoExportCheckbox
+            //
+            autoExportCheckBox = new CheckBox();
+            autoExportCheckBox.AutoSize = true;
+            autoExportCheckBox.Location = new Point(17, 810);
+            autoExportCheckBox.Name = "autoExportCheckBox";
+            autoExportCheckBox.Size = new Size(250, 29);
+            autoExportCheckBox.TabIndex = 15;
+            autoExportCheckBox.Text = "Automatically export when job completes";
+            autoExportCheckBox.UseVisualStyleBackColor = true;
             // 
             // availableJobsListView
             // 
@@ -235,6 +246,7 @@
             Controls.Add(startDateTimePicker);
             Controls.Add(scheduledJobsListView);
             Controls.Add(availableJobsListView);
+            Controls.Add(autoExportCheckBox);
             Margin = new Padding(4, 5, 4, 5);
             Name = "ScheduleJobForm";
             Text = "Schedule Jobs";
@@ -266,5 +278,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox autoExportCheckBox;
     }
 }
